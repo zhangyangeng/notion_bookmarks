@@ -5,12 +5,47 @@ import React, { useState, useEffect } from "react";
 import LinkCard from "@/components/ui/LinkCard";
 import * as Icons from "lucide-react";
 import { Link, Category } from '@/types/notion';
+import { useInView } from 'react-intersection-observer';
 
 interface LinkContainerProps {
   initialLinks: Link[];
   enabledCategories: Set<string>;
   categories: Category[];
 }
+
+// 子分类部分组件
+const CategorySection = ({ id, subCategory, links }: { id: string, subCategory: string, links: Link[] }) => {
+  const { ref, inView } = useInView({
+    threshold: 0,
+    triggerOnce: true,
+    rootMargin: '100px 0px',
+  });
+
+  return (
+    <div
+      ref={ref}
+      id={id}
+      className="space-y-4"
+    >
+      <div className="flex items-center space-x-2">
+        <div className="w-1 h-1 rounded-full bg-primary"></div>
+        <h3 className="text-lg font-medium text-foreground/90">
+          {subCategory}
+        </h3>
+        <div className="text-sm text-muted-foreground">({links.length})</div>
+      </div>
+      {inView ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
+          {links.map((link) => (
+            <LinkCard key={link.id} link={link} className="w-full" />
+          ))}
+        </div>
+      ) : (
+        <div className="w-full h-32 animate-pulse bg-muted rounded-lg" />
+      )}
+    </div>
+  );
+};
 
 export default function LinkContainer({
   initialLinks,
@@ -77,28 +112,12 @@ export default function LinkContainer({
 
             <div className="space-y-12">
               {Object.entries(categoryLinks).map(([subCategory, links]) => (
-                <div
-                  key={`${category.id}-${subCategory
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                  id={`${category.id}-${subCategory
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                  className="space-y-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <div className="w-1 h-1 rounded-full bg-primary"></div>
-                    <h3 className="text-lg font-medium text-foreground/90">
-                      {subCategory}
-                    </h3>
-                    <div className="text-sm text-muted-foreground">({links.length})</div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
-                    {links.map((link) => (
-                      <LinkCard key={link.id} link={link} className="w-full" />
-                    ))}
-                  </div>
-                </div>
+                <CategorySection
+                  key={`${category.id}-${subCategory.toLowerCase().replace(/\s+/g, "-")}`}
+                  id={`${category.id}-${subCategory.toLowerCase().replace(/\s+/g, "-")}`}
+                  subCategory={subCategory}
+                  links={links}
+                />
               ))}
             </div>
           </section>

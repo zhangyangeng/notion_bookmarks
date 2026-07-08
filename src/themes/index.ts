@@ -1,39 +1,13 @@
 import './theme.css'
 import { simpleTheme } from './simple';
-import { cyberpunkTheme } from './cyberpunk';
+import {
+  getAllThemes,
+  getThemeMode,
+  themes,
+  type Theme
+} from './registry';
 
-export interface Theme {
-  name: string
-  displayName: string
-  mode: 'light' | 'dark'
-}
-
-export const themes: Theme[] = [
-  {
-    name: 'simple-light',
-    displayName: '简约浅色',
-    mode: 'light'
-  },
-  {
-    name: 'simple-dark',
-    displayName: '简约深色',
-    mode: 'dark'
-  },
-  {
-    name: 'cyberpunk-dark',
-    displayName: '赛博朋克',
-    mode: 'dark'
-  }
-]
-
-export function getAllThemes(): Theme[] {
-  return themes
-}
-
-export function getThemeMode(themeName: string): 'light' | 'dark' {
-  const theme = themes.find(t => t.name === themeName)
-  return theme?.mode || 'light'
-}
+export { themes, getAllThemes, getThemeMode, type Theme };
 
 // 应用主题样式
 export function applyTheme(themeName: string) {
@@ -41,7 +15,7 @@ export function applyTheme(themeName: string) {
   if (!themes.find(t => t.name === themeName)) {
     themeName = 'simple-light'
   }
-  
+
   document.documentElement.setAttribute('data-theme', themeName)
   // 保存到 localStorage
   localStorage.setItem('theme', themeName)
@@ -51,5 +25,7 @@ export function applyTheme(themeName: string) {
 
 export { simpleTheme } from './simple';
 export { cyberpunkTheme } from './cyberpunk';
+export { bauhausTheme } from './bauhaus';
+export { macintosh1984Theme } from './macintosh-1984';
 
 export const defaultTheme = simpleTheme;

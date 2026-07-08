@@ -1,14 +1,12 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
-import { SimpleTime, AnalogClock, Weather, IPInfo, HotNews } from '@/components/widgets';
-import WidgetsContainer from '@/components/layout/WidgetsContainer';
+import HomeWidgets from '@/components/widgets/HomeWidgets';
 import React from 'react';
-import { Category, Link as LinkType, WebsiteConfig } from '@/types/notion';
+import { Category, Link as LinkType, WebsiteConfig } from '@/types';
 
 interface MainContentProps {
   categoriesWithSubs: Category[];
@@ -75,7 +73,7 @@ export default function MainContent({
       const sections = Array.from(
         document.querySelectorAll('section[id] div[id]')
       ) as HTMLElement[];
-      
+
       if (sections.length === 0) return;
 
       const scrollPosition = window.scrollY;
@@ -143,22 +141,6 @@ export default function MainContent({
     return activeCategories.filter(cat => cat.id === selectedCategoryId);
   }, [activeCategories, selectedCategoryId]);
 
-  const widgetMap: Record<string, React.ReactNode> = {
-    '简易时钟': <SimpleTime />,
-    '圆形时钟': <AnalogClock />,
-    '天气': <Weather />,
-    'IP信息': <IPInfo />,
-    '热搜': <HotNews />,
-  };
-  const widgetConfig = config.WIDGET_CONFIG?.split(',').map(s => s.trim()).filter(Boolean) ?? [];
-  const widgets = widgetConfig
-    .map((name, idx) => {
-      const Comp = widgetMap[name];
-      if (!Comp) return null;
-      return <React.Fragment key={name + '-' + idx}>{Comp}</React.Fragment>;
-    })
-    .filter(Boolean);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <nav className="fixed top-0 left-0 right-0 z-30 bg-white border-b lg:hidden">
@@ -180,9 +162,9 @@ export default function MainContent({
         />
       </aside>
       <main className="ml-0 lg:ml-[300px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
-        {widgets.length > 0 && (
+        {config.WIDGET_CONFIG && (
           <div className="w-full">
-            <WidgetsContainer>{widgets}</WidgetsContainer>
+            <HomeWidgets config={config} />
           </div>
         )}
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">

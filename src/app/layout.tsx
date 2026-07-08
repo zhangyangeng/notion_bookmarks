@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider"
 import { Metadata } from "next"
 import { Clarity } from "@/components/analytics/Clarity"
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import { getWebsiteConfig } from "@/lib/notion"
 import { mergeConfig } from "@/config"
@@ -76,6 +78,8 @@ export default async function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           {children}
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>

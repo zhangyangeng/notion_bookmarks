@@ -113,3 +113,22 @@ html, body {
     transform: translateY(0);
   }
 }
+
+/* QWeather Icons */
+@font-face {
+  font-family: 'qweather-icons';
+  src: url('/fonts/qweather-icons.woff2') format('woff2'),
+       url('/fonts/qweather-icons.woff') format('woff'),
+       url('/fonts/qweather-icons.ttf') format('truetype');
+  font-display: block;
+}
+
+[class^="qi-"], [class*=" qi-"] {
+  font-family: 'qweather-icons' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+}

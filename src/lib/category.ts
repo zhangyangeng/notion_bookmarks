@@ -1,5 +1,5 @@
 // src/utils/category.ts
-import { Link } from '@/types/notion';
+import { Link } from '@/types';
 
 // 创建一个分类数据结构
 export interface CategoryData {

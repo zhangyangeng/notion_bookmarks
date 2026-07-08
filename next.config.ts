@@ -5,9 +5,7 @@ const config: NextConfig = {
     // 禁用图片优化以避免付费服务
     unoptimized: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   // 优化资源加载
   experimental: {
     optimizeCss: true,

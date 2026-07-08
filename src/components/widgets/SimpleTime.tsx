@@ -68,7 +68,7 @@ export default function SimpleTime() {
   }, []); // 依赖数组为空，只在组件挂载时执行一次
 
   // 日期格式化 - 只有在 time 存在时才进行
-  const year = time?.getFullYear() || 0;
+
   const month = (time?.getMonth() || 0) + 1;
   const day = time?.getDate() || 0;
   const hours = (time?.getHours() || 0).toString().padStart(2, '0');

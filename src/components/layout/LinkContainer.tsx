@@ -1,10 +1,10 @@
 // src/components/LinkContainer.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import LinkCard from "@/components/ui/LinkCard";
 import * as Icons from "lucide-react";
-import { Link, Category } from '@/types/notion';
+import { Link, Category } from '@/types';
 
 interface LinkContainerProps {
   initialLinks: Link[];
@@ -12,7 +12,7 @@ interface LinkContainerProps {
   categories: Category[];
 }
 
-export default function LinkContainer({
+const LinkContainer = memo(function LinkContainer({
   initialLinks,
   enabledCategories,
   categories,
@@ -24,8 +24,9 @@ export default function LinkContainer({
     setMounted(true);
     setCurrentTime(new Date());
   }, []);
+
   // 按一级和二级分类组织链接，只包含启用的分类
-  const linksByCategory = initialLinks.reduce((acc, link) => {
+  const linksByCategory = useMemo(() => initialLinks.reduce((acc, link) => {
     const cat1 = link.category1;
     const cat2 = link.category2;
 
@@ -39,7 +40,7 @@ export default function LinkContainer({
       acc[cat1][cat2].push(link);
     }
     return acc;
-  }, {} as Record<string, Record<string, Link[]>>);
+  }, {} as Record<string, Record<string, Link[]>>), [initialLinks, enabledCategories]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleString('zh-CN', {
@@ -60,10 +61,10 @@ export default function LinkContainer({
 
         return (
           <section key={category.id} id={category.id} className="space-y-8">
-            <div className="flex items-center space-x-3 pb-2 border-b">
+            <div className="section-heading flex items-center gap-3 pb-2 border-b">
               {category.iconName &&
               Icons[category.iconName as keyof typeof Icons] ? (
-                <div className="w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
+                <div className="section-heading-icon w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
                   {React.createElement(
                     Icons[
                       category.iconName as keyof typeof Icons
@@ -72,7 +73,7 @@ export default function LinkContainer({
                   )}
                 </div>
               ) : null}
-              <h2 className="text-2xl font-bold tracking-tight">{category.name}</h2>
+              <h2 className="section-heading-title text-2xl font-bold tracking-tight">{category.name}</h2>
             </div>
 
             <div className="space-y-12">
@@ -111,4 +112,6 @@ export default function LinkContainer({
       )}
     </div>
   );
-}
+});
+
+export default LinkContainer;

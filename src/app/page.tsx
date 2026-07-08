@@ -2,18 +2,18 @@
 import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
 import MainContent from '@/components/layout/MainContent';
 
-export const revalidate = 43200; // 12小时重新验证一次
+// Optimize revalidation
+export const revalidate = 43200;
 
 export default async function HomePage() {
-  // 1. 获取数据
+  // 获取数据 - Parallel Fetching
   const [notionCategories, links, config] = await Promise.all([
     getCategories(),
     getLinks(),
     getWebsiteConfig(),
   ]);
 
-
-  // 2. 获取启用的分类名称集合
+  // 获取启用的分类名称集合
   const enabledCategories = new Set(notionCategories.map(cat => cat.name));
 
   // 处理链接数据，只保留启用分类中的链接
@@ -29,7 +29,7 @@ export default async function HomePage() {
   const categoriesWithLinks = new Set(processedLinks.map(link => link.category1));
 
   // 过滤掉没有链接的分类
-  const activeCategories = notionCategories.filter(category => 
+  const activeCategories = notionCategories.filter(category =>
     categoriesWithLinks.has(category.name)
   );
 
@@ -50,7 +50,6 @@ export default async function HomePage() {
     };
   });
 
-  // 3. 将数据传递给客户端组件进行渲染
   return (
     <MainContent
       categoriesWithSubs={categoriesWithSubs}

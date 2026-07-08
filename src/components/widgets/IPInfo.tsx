@@ -16,16 +16,16 @@ const getLocalIP = () => {
       return;
     }
     
-    const RTCPeerConnection = window.RTCPeerConnection || 
-      (window as any).webkitRTCPeerConnection || 
-      (window as any).mozRTCPeerConnection;
+    const PeerConnection = window.RTCPeerConnection || 
+      (window as unknown as { webkitRTCPeerConnection: typeof window.RTCPeerConnection }).webkitRTCPeerConnection || 
+      (window as unknown as { mozRTCPeerConnection: typeof window.RTCPeerConnection }).mozRTCPeerConnection;
 
-    if (!RTCPeerConnection) {
+    if (!PeerConnection) {
       reject(new Error('WebRTC not supported'));
       return;
     }
 
-    const pc = new RTCPeerConnection({
+    const pc = new PeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },

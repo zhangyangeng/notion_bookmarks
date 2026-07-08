@@ -1,0 +1,384 @@
+/* 麦金塔经典 1984 主题样式 */
+
+[data-theme="macintosh-1984"] {
+  --mac-ink: hsl(0 0% 12%);
+  --mac-paper: hsl(0 0% 96%);
+  --mac-screen: hsl(0 0% 88%);
+  --mac-panel: hsl(0 0% 98%);
+  --mac-gray: hsl(0 0% 74%);
+  --mac-gray-dark: hsl(0 0% 44%);
+  --mac-hairline: 1px solid var(--mac-ink);
+  --mac-line: 1px solid var(--mac-ink);
+  --mac-window-shadow: 3px 3px 0 hsl(0 0% 18%);
+  --mac-window-shadow-hover: 4px 4px 0 hsl(0 0% 18%);
+  --mac-highlight: repeating-linear-gradient(
+    to bottom,
+    var(--mac-ink) 0,
+    var(--mac-ink) 2px,
+    hsl(0 0% 28%) 2px,
+    hsl(0 0% 28%) 4px
+  );
+  --mac-titlebar: repeating-linear-gradient(
+    to bottom,
+    var(--mac-paper) 0,
+    var(--mac-paper) 3px,
+    hsl(0 0% 80%) 3px,
+    hsl(0 0% 80%) 4px
+  );
+  --mac-control-shadow: inset 1px 1px 0 var(--mac-paper), inset -2px -2px 0 var(--mac-gray-dark);
+  --mac-inset-shadow: inset 2px 2px 0 var(--mac-gray-dark), inset -1px -1px 0 var(--mac-paper);
+  --background: var(--mac-screen);
+  --foreground: var(--mac-ink);
+  --muted: hsl(0 0% 78%);
+  --muted-foreground: hsl(0 0% 18%);
+  --popover: var(--mac-panel);
+  --popover-foreground: var(--mac-ink);
+  --card: var(--mac-panel);
+  --card-foreground: var(--mac-ink);
+  --border: var(--mac-ink);
+  --input: var(--mac-paper);
+  --primary: var(--mac-ink);
+  --primary-foreground: var(--mac-paper);
+  --secondary: var(--mac-gray);
+  --secondary-foreground: var(--mac-ink);
+  --accent: var(--mac-paper);
+  --accent-foreground: var(--mac-ink);
+  --shadow-sm: 2px 2px 0 var(--mac-ink);
+  --shadow-md: 4px 4px 0 var(--mac-ink);
+  --shadow-lg: 6px 6px 0 var(--mac-ink);
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  font-family: "Chicago", "Geneva", "Monaco", "Noto Sans SC", system-ui, sans-serif;
+  font-weight: 500;
+  image-rendering: pixelated;
+  letter-spacing: 0;
+}
+
+[data-theme="macintosh-1984"] body {
+  color: var(--mac-ink);
+  background-color: var(--mac-screen);
+  background-image:
+    linear-gradient(45deg, hsl(0 0% 80%) 25%, transparent 25%),
+    linear-gradient(-45deg, hsl(0 0% 80%) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, hsl(0 0% 80%) 75%),
+    linear-gradient(-45deg, transparent 75%, hsl(0 0% 80%) 75%);
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  background-size: 8px 8px;
+}
+
+[data-theme="macintosh-1984"] h1,
+[data-theme="macintosh-1984"] h2,
+[data-theme="macintosh-1984"] h3,
+[data-theme="macintosh-1984"] h4,
+[data-theme="macintosh-1984"] h5,
+[data-theme="macintosh-1984"] h6 {
+  color: var(--mac-ink);
+  font-family: "Chicago", "Geneva", "Monaco", "Noto Sans SC", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+[data-theme="macintosh-1984"] nav {
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border-color: var(--mac-ink);
+  box-shadow: 0 3px 0 var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] nav span,
+[data-theme="macintosh-1984"] nav .nav-category-button,
+[data-theme="macintosh-1984"] nav .nav-subcategory-button,
+[data-theme="macintosh-1984"] nav .mobile-nav-category-button {
+  color: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .neon-title {
+  color: var(--mac-ink);
+  text-shadow: none;
+}
+
+[data-theme="macintosh-1984"] .widget-card {
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-window-shadow);
+  isolation: isolate;
+}
+
+[data-theme="macintosh-1984"] a.group {
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-window-shadow);
+  isolation: isolate;
+  min-height: 8.6rem;
+  padding-top: 1.65rem !important;
+}
+
+[data-theme="macintosh-1984"] a.group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  height: 0.95rem;
+  border-bottom: var(--mac-line);
+  background: var(--mac-titlebar);
+  pointer-events: none;
+}
+
+[data-theme="macintosh-1984"] a.group::after {
+  content: "";
+  position: absolute;
+  top: 0.25rem;
+  left: 0.42rem;
+  z-index: 1;
+  width: 0.48rem;
+  height: 0.48rem;
+  background: var(--mac-paper);
+  border: var(--mac-hairline);
+  box-shadow: var(--mac-inset-shadow);
+  pointer-events: none;
+}
+
+[data-theme="macintosh-1984"] a.group > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="macintosh-1984"] .widget-card:hover,
+[data-theme="macintosh-1984"] a.group:hover {
+  border-color: var(--mac-ink);
+  box-shadow: var(--mac-window-shadow-hover);
+  transform: translate(-1px, -1px);
+}
+
+[data-theme="macintosh-1984"] a.group h3 {
+  color: var(--mac-ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+[data-theme="macintosh-1984"] a.group p,
+[data-theme="macintosh-1984"] .hot-news-title {
+  color: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] a.group .icon-container,
+[data-theme="macintosh-1984"] a.group [class*="bg-muted"] {
+  color: var(--mac-ink);
+  background: var(--mac-paper);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-inset-shadow);
+}
+
+[data-theme="macintosh-1984"] a.group .link-tag,
+[data-theme="macintosh-1984"] .tag {
+  color: var(--mac-ink);
+  background: var(--mac-paper);
+  border: 1px solid var(--mac-ink);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] nav button:not(.theme-switcher-trigger):not(.theme-switcher-option),
+[data-theme="macintosh-1984"] .platform-tab {
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] nav button:not(.theme-switcher-trigger):not(.theme-switcher-option):hover,
+[data-theme="macintosh-1984"] .platform-tab:hover {
+  color: var(--mac-paper);
+  background: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .platform-tab-active,
+[data-theme="macintosh-1984"] nav button.bg-primary,
+[data-theme="macintosh-1984"] nav button[class*="bg-primary"],
+[data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active {
+  color: var(--mac-paper) !important;
+  background: var(--mac-highlight) !important;
+  box-shadow: var(--mac-inset-shadow);
+}
+
+[data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active span,
+[data-theme="macintosh-1984"] nav button.nav-category-button.nav-category-active svg,
+[data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active,
+[data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active span,
+[data-theme="macintosh-1984"] nav button.mobile-nav-category-button.mobile-nav-category-active svg {
+  color: var(--mac-paper) !important;
+}
+
+[data-theme="macintosh-1984"] nav .nav-subcategory-button {
+  border-left: var(--mac-line);
+  border-radius: 0;
+}
+
+[data-theme="macintosh-1984"] nav button.nav-subcategory-button.nav-subcategory-active {
+  color: var(--mac-ink) !important;
+  background: var(--mac-gray) !important;
+  box-shadow: inset 5px 0 0 var(--mac-ink), var(--mac-inset-shadow);
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.45rem;
+  height: 2.45rem;
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-trigger:hover {
+  color: var(--mac-paper);
+  background: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-menu {
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-option {
+  color: var(--mac-ink);
+  border-radius: 0;
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-option + .theme-switcher-option {
+  border-top: 1px solid var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .theme-switcher-option:hover,
+[data-theme="macintosh-1984"] .theme-switcher-option-active {
+  color: var(--mac-paper);
+  background: var(--mac-highlight);
+}
+
+[data-theme="macintosh-1984"] section > .section-heading {
+  color: var(--mac-ink);
+  border-bottom: var(--mac-line);
+}
+
+[data-theme="macintosh-1984"] section > .section-heading .section-heading-icon {
+  color: var(--mac-paper);
+  background: var(--mac-ink);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] .weather-widget .weather-background-decor {
+  display: none;
+}
+
+[data-theme="macintosh-1984"] .weather-widget .weather-location-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 0.35rem;
+  padding: 0;
+  vertical-align: middle;
+  color: var(--mac-ink);
+  background: var(--mac-paper);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] .weather-widget .weather-location-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] .weather-widget .air-quality-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 1.35rem;
+  min-width: 3.4rem;
+  padding: 0 0.45rem;
+  color: var(--mac-ink);
+  background: var(--mac-paper);
+  border: var(--mac-line);
+  border-radius: 0;
+  box-shadow: var(--mac-control-shadow);
+}
+
+[data-theme="macintosh-1984"] .weather-widget .air-quality-category {
+  padding: 0;
+  color: var(--mac-ink);
+  background: transparent;
+  font-weight: 700;
+}
+
+[data-theme="macintosh-1984"] .weather-widget .air-quality-value {
+  color: var(--mac-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme="macintosh-1984"] .hot-news-item {
+  position: relative;
+  overflow: hidden;
+  color: var(--mac-ink);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border-left: var(--mac-line);
+}
+
+[data-theme="macintosh-1984"] .hot-news-item:hover {
+  color: var(--mac-paper);
+  background: var(--mac-highlight);
+}
+
+[data-theme="macintosh-1984"] .hot-news-index,
+[data-theme="macintosh-1984"] .hot-news-icon {
+  color: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] footer {
+  color: var(--mac-ink);
+  background: var(--mac-panel);
+  border-color: var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] ::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+[data-theme="macintosh-1984"] ::-webkit-scrollbar-track {
+  background: var(--mac-paper);
+  border: 1px solid var(--mac-ink);
+}
+
+[data-theme="macintosh-1984"] ::-webkit-scrollbar-thumb {
+  background: var(--mac-gray);
+  border: 2px solid var(--mac-ink);
+  box-shadow: var(--mac-control-shadow);
+}

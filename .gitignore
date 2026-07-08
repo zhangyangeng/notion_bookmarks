@@ -52,3 +52,16 @@ yarn-error.log*
 
 # Trae AI IDE files
 .trae/
+
+# Claude Code files (internal AI collaboration)
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# OpenSpec project planning (internal use)
+openspec/
+
+# Local Codex planning and visual QA artifacts
+docs/
+outputs/
+design-qa.md

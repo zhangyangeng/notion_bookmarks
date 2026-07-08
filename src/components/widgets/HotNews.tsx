@@ -18,6 +18,8 @@ const platforms = [
   { id: 'douyin', name: '抖音' }
 ];
 
+const CACHE_TIME = 15 * 60 * 1000; // 15分钟
+
 export default function HotNews() {
   const [activePlatform, setActivePlatform] = useState('weibo');
   const [news, setNews] = useState<HotNewsItem[]>([]);
@@ -25,14 +27,25 @@ export default function HotNews() {
   const [error, setError] = useState<string | null>(null);
   const [allNews, setAllNews] = useState<Record<string, HotNewsItem[]>>({});
   const lastFetchTime = useRef<number>(0);
-  const CACHE_TIME = 15 * 60 * 1000; // 15分钟
+
+  // 使用 ref 来保存最新的 activePlatform 和 allNews，避免在 fetchHotNews 中产生依赖
+  const activePlatformRef = useRef(activePlatform);
+  const allNewsRef = useRef(allNews);
+
+  useEffect(() => {
+    activePlatformRef.current = activePlatform;
+    allNewsRef.current = allNews;
+  }, [activePlatform, allNews]);
 
   // 获取数据的函数
   const fetchHotNews = useCallback(async (force = false) => {
     const now = Date.now();
+    const currentAllNews = allNewsRef.current;
+    const currentPlatform = activePlatformRef.current;
+
     // 如果数据在缓存时间内且不是强制刷新，直接使用缓存数据
-    if (!force && now - lastFetchTime.current < CACHE_TIME && Object.keys(allNews).length > 0) {
-      setNews(allNews[activePlatform] || []);
+    if (!force && now - lastFetchTime.current < CACHE_TIME && Object.keys(currentAllNews).length > 0) {
+      setNews(currentAllNews[currentPlatform] || []);
       return;
     }
 
@@ -45,7 +58,8 @@ export default function HotNews() {
       }
       const data = await response.json();
       setAllNews(data);
-      setNews(data[activePlatform] || []);
+      // update ref immediately for subsequent logic if needed, but state update will trigger re-render
+      setNews(data[currentPlatform] || []);
       lastFetchTime.current = now;
     } catch (error) {
       console.error('Failed to fetch hot news:', error);
@@ -53,7 +67,7 @@ export default function HotNews() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // Empty dependency array as we use refs
 
   // 当平台切换时更新显示的数据
   useEffect(() => {

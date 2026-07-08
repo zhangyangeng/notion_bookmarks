@@ -1,6 +1,7 @@
 'use client'
 
-import { WebsiteConfig } from '@/types/notion'
+import React, { memo } from 'react'
+import { WebsiteConfig } from '@/types'
 import { FaGithub, FaXTwitter, FaWeibo } from 'react-icons/fa6'
 import { FaBlogger } from 'react-icons/fa'
 import { cn } from '@/lib/utils'
@@ -10,7 +11,7 @@ interface FooterProps {
   className?: string
 }
 
-export default function Footer({ config, className = "" }: FooterProps) {
+const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
   return (
     <footer className={`fixed bottom-0 left-0 right-0 bg-background border-t py-4 z-10 ${className}`}>
       <div className="container mx-auto px-4">
@@ -65,6 +66,8 @@ export default function Footer({ config, className = "" }: FooterProps) {
                   className={cn(
                     "filter-muted hover:filter-none transition-all"
                   )}
+                  loading="lazy"
+                  decoding="async"
                 />
               </a>
             )}
@@ -95,6 +98,8 @@ export default function Footer({ config, className = "" }: FooterProps) {
                   className={cn(
                     "filter-muted hover:filter-none transition-all"
                   )}
+                  loading="lazy"
+                  decoding="async"
                 />
               </a>
             )}
@@ -111,4 +116,6 @@ export default function Footer({ config, className = "" }: FooterProps) {
       </div>
     </footer>
   )
-}
+});
+
+export default Footer;

@@ -1,0 +1,145 @@
+'use client';
+
+import React from 'react';
+import {
+  Globe,
+  Folder,
+  Rocket,
+  Code,
+  Laptop,
+  Terminal,
+  Cpu,
+  Sparkles,
+  Bot,
+  Wrench,
+  Compass,
+  BookOpen,
+  Bookmark,
+  Film,
+  Music,
+  Palette,
+  PenTool,
+  Layout,
+  Layers,
+  Shield,
+  Zap,
+  Cloud,
+  Database,
+  Server,
+  Coffee,
+  Star,
+  Heart,
+  Smile,
+  Search,
+  ShoppingBag,
+  Briefcase,
+  MessageSquare,
+  Monitor,
+  FileText,
+  Image,
+  Video,
+  Headphones,
+  Settings,
+  Radio,
+  Box,
+  Flame,
+  BarChart,
+  Send,
+  Link2,
+  Hash,
+  Share2,
+  BookmarkCheck,
+  Feather,
+  Layers2,
+  Grid,
+  Library,
+  Newspaper,
+  Tv,
+  Camera,
+  Play,
+  PlayCircle,
+  type LucideIcon,
+} from 'lucide-react';
+
+// 常用分类图标映射表，避免动态 import * as Icons 导致整个 1000+ 图标库被打入客户端包
+const ICON_MAP: Record<string, LucideIcon> = {
+  Globe,
+  Folder,
+  Rocket,
+  Code,
+  Laptop,
+  Terminal,
+  Cpu,
+  Sparkles,
+  Bot,
+  Wrench,
+  Compass,
+  BookOpen,
+  Bookmark,
+  Film,
+  Music,
+  Palette,
+  PenTool,
+  Layout,
+  Layers,
+  Shield,
+  Zap,
+  Cloud,
+  Database,
+  Server,
+  Coffee,
+  Star,
+  Heart,
+  Smile,
+  Search,
+  ShoppingBag,
+  Briefcase,
+  MessageSquare,
+  Monitor,
+  FileText,
+  Image,
+  Video,
+  Headphones,
+  Settings,
+  Radio,
+  Box,
+  Flame,
+  BarChart,
+  Send,
+  Link: Link2,
+  Link2,
+  Hash,
+  Share2,
+  BookmarkCheck,
+  Feather,
+  Layers2,
+  Grid,
+  Library,
+  Newspaper,
+  Tv,
+  Camera,
+  Play,
+  PlayCircle,
+};
+
+interface CategoryIconProps {
+  name?: string | null;
+  className?: string;
+  fallback?: LucideIcon;
+}
+
+export function CategoryIcon({
+  name,
+  className = 'w-5 h-5',
+  fallback: FallbackIcon = Globe,
+}: CategoryIconProps) {
+  if (!name) {
+    return <FallbackIcon className={className} />;
+  }
+
+  const IconComponent = ICON_MAP[name] || FallbackIcon;
+  return <IconComponent className={className} />;
+}
+
+export default CategoryIcon;
+

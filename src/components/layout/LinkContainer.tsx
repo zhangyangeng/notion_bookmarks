@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo, memo } from "react";
 import LinkCard from "@/components/ui/LinkCard";
-import * as Icons from "lucide-react";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Link, Category } from '@/types';
 
 interface LinkContainerProps {
@@ -62,15 +62,9 @@ const LinkContainer = memo(function LinkContainer({
         return (
           <section key={category.id} id={category.id} className="space-y-8">
             <div className="section-heading flex items-center gap-3 pb-2 border-b">
-              {category.iconName &&
-              Icons[category.iconName as keyof typeof Icons] ? (
+              {category.iconName ? (
                 <div className="section-heading-icon w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
-                  {React.createElement(
-                    Icons[
-                      category.iconName as keyof typeof Icons
-                    ] as React.ComponentType<{ className: string }>,
-                    { className: "w-5 h-5" }
-                  )}
+                  <CategoryIcon name={category.iconName} className="w-5 h-5" />
                 </div>
               ) : null}
               <h2 className="section-heading-title text-2xl font-bold tracking-tight">{category.name}</h2>

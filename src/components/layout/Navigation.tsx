@@ -3,7 +3,8 @@
 import React, { useState, useEffect, memo, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher'
-import * as Icons from 'lucide-react'
+import { Rocket, ChevronDown, Globe } from 'lucide-react'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { Category, WebsiteConfig } from '@/types'
 import { useTheme } from 'next-themes'
 
@@ -42,7 +43,7 @@ const Navigation = memo(function Navigation({
     }
   }, [selectedCategoryId, categories]);
 
-  const toggleCategory = useCallback((categoryId: string) => {
+  const handleCategoryToggle = useCallback((categoryId: string) => {
     setExpandedCategoryId(prevId => (prevId === categoryId ? null : categoryId));
   }, []);
 
@@ -69,9 +70,9 @@ const Navigation = memo(function Navigation({
 
   const handleCategoryClick = useCallback((category: Category) => {
     onNavChange(category.id);
-    toggleCategory(category.id);
+    handleCategoryToggle(category.id);
     handleScrollTo(category.id);
-  }, [onNavChange, toggleCategory, handleScrollTo]);
+  }, [onNavChange, handleCategoryToggle, handleScrollTo]);
 
   const handleSubCategoryClick = useCallback((category: Category, subCategory: { id: string; name: string }) => {
     onNavChange(category.id, `${category.id}-${subCategory.id}`);
@@ -88,7 +89,7 @@ const Navigation = memo(function Navigation({
       <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
-            <Icons.Rocket className="w-5 h-5 text-foreground" />
+            <Rocket className="w-5 h-5 text-foreground" />
             <span className="neon-title">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
@@ -97,9 +98,10 @@ const Navigation = memo(function Navigation({
           <div className="flex px-4 min-w-full">
             <div className="flex space-x-2 mx-auto">
               {categories.map((category) => {
+                const activeCategory = activeSubCategoryId || '';
                 const isMobileCategoryActive =
                   selectedCategoryId === category.id ||
-                  (selectedCategoryId && activeSubCategoryId?.startsWith(`${category.id}-`));
+                  (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
 
                 return (
                   <button
@@ -131,19 +133,17 @@ const Navigation = memo(function Navigation({
       <nav className="hidden lg:block w-[280px] flex-shrink-0 h-screen sticky top-0 p-4 overflow-y-auto border-r">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
-            <Icons.Rocket className="w-5 h-5 text-foreground" />
+            <Rocket className="w-5 h-5 text-foreground" />
             <span className="neon-title">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
         <ul className="space-y-1 pb-24">
           {categories.map((category) => {
-            const IconComponent = category.iconName && (category.iconName in Icons)
-              ? (Icons[category.iconName as keyof typeof Icons] as React.ComponentType)
-              : Icons.Globe;
+            const activeCategory = activeSubCategoryId || '';
             const isCategoryActive =
               selectedCategoryId === category.id ||
-              (selectedCategoryId && activeSubCategoryId?.startsWith(`${category.id}-`));
+              (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
             const isCategoryExpanded = expandedCategoryId === category.id;
 
             return (
@@ -163,10 +163,10 @@ const Navigation = memo(function Navigation({
                     )}
                   >
                     <div className="flex items-center space-x-2">
-                      <IconComponent className="w-4 h-4" />
+                      <CategoryIcon name={category.iconName} className="w-4 h-4" fallback={Globe} />
                       <span>{category.name}</span>
                     </div>
-                    <Icons.ChevronDown
+                    <ChevronDown
                       className={cn(
                         "w-4 h-4 transition-transform",
                         expandedCategoryId === category.id ? "rotate-180" : ""

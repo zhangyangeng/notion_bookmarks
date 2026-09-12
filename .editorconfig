@@ -1,0 +1,23 @@
+# 编辑器通用格式规则（优先级低于 .prettierrc，仅用于编辑器实时行为）
+# 目的：让任何编辑器 / AI 工具在保存文件时自动遵循同一套缩进，避免出现第三种风格
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{css,scss}]
+indent_size = 2

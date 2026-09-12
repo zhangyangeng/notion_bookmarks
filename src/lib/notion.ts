@@ -26,6 +26,13 @@ export const notion = new Client({
 
 export const revalidate = parseInt(process.env.REVALIDATE_TIME ?? '43200', 10);
 
+// 数据拉取失败标记。三个读取函数在 catch 时置位，供页面判断是否要挂「降级」提示。
+// 用模块级标记而非改返回值，是为了不破坏现有 5 处调用点的返回类型。
+let dataFetchFailed = false;
+
+/** 读取当前是否发生过数据拉取失败（用于「内容加载失败」降级提示）。 */
+export const hasDataFetchFailed = () => dataFetchFailed;
+
 // 可见性白名单：只有 `公开` 会被展示，其余值（含未填）一律不展示。
 // 用白名单而非黑名单，是为了 fail-closed —— 条目漏填时默认不公开，而不是默认公开。
 const VISIBILITY_PROPERTY = '可见性';
@@ -84,6 +91,7 @@ export const getLinks = cache(async () => {
     return allLinks;
   } catch (error) {
     console.error('Error fetching links:', error);
+    dataFetchFailed = true;
     return [];
   }
 });
@@ -206,6 +214,7 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     return categories.sort((a, b) => a.order - b.order);
   } catch (err) {
     console.error('获取分类失败:', err);
+    dataFetchFailed = true;
     return [];
   }
 });
@@ -235,6 +244,7 @@ export const getCollections = cache(async (): Promise<Collection[]> => {
     return collections.sort((a, b) => a.order - b.order);
   } catch (err) {
     console.error('获取合集失败:', err);
+    dataFetchFailed = true;
     return [];
   }
 });

@@ -1,11 +1,12 @@
-import { getCollections, getLinks } from '@/lib/notion';
+import { getCollections, getLinks, hasDataFetchFailed } from '@/lib/notion';
 import { assertUniqueSlugs, resolveCollectionBySlug } from '@/lib/collection';
 import ShareCard from '@/components/share/ShareCard';
+import DataUnavailableBanner from '@/components/layout/DataUnavailableBanner';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 
-export const revalidate = 43200;
+export const revalidate = 600;
 
 // 预生成所有公开合集的分享页（ISR 快照），请求时不再打 Notion API。
 export async function generateStaticParams() {
@@ -34,10 +35,31 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
   const { slug } = await params;
   const [collections, links] = await Promise.all([getCollections(), getLinks()]);
 
+  // Notion 不可达时，合集拉不到会导致误判为「不存在」而 404。
+  // 此时先判断是否拉取失败，失败则降级提示，而不是把临时故障伪装成「没有这个合集」。
+  const dataUnavailable = hasDataFetchFailed();
+
   assertUniqueSlugs(collections);
   const result = resolveCollectionBySlug(collections, links, slug);
 
   if (!result) {
+    // 拉取失败时降级渲染，而非 404：合集可能真实存在，只是临时读不到。
+    if (dataUnavailable) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+          <DataUnavailableBanner />
+          <main className="max-w-3xl mx-auto px-4 py-12">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+            >
+              ← 返回导航
+            </Link>
+            <p className="text-muted-foreground">这个合集暂时无法加载，请稍后刷新。</p>
+          </main>
+        </div>
+      );
+    }
     notFound();
   }
 

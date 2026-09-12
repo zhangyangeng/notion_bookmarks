@@ -1,5 +1,5 @@
 // src/app/page.tsx
-import { getLinks, getCategories, getWebsiteConfig } from '@/lib/notion';
+import { getLinks, getCategories, getWebsiteConfig, hasDataFetchFailed } from '@/lib/notion';
 import {
   buildCategoryTree,
   createUncategorizedCategory,
@@ -7,9 +7,10 @@ import {
   UNCATEGORIZED_ID,
 } from '@/lib/category';
 import MainContent from '@/components/layout/MainContent';
+import DataUnavailableBanner from '@/components/layout/DataUnavailableBanner';
 
-// Optimize revalidation
-export const revalidate = 43200;
+// 数据兜底：10 分钟。降到 12 小时以下是为了改完能更快看到，同时远离 Notion 180 req/min 的限流线。
+export const revalidate = 600;
 
 export default async function HomePage() {
   // 获取数据 - Parallel Fetching
@@ -18,6 +19,9 @@ export default async function HomePage() {
     getLinks(),
     getWebsiteConfig(),
   ]);
+
+  // 数据拉取失败时挂降级提示，而不是白屏装没事。
+  const dataUnavailable = hasDataFetchFailed();
 
   // 分类记录取全量（含已关闭项），resolveLinks 才分得清「分类被关闭」与「分类不存在」：
   // 前者整条收起，后者落到「未分类」—— 归类缺失在界面上可见，而不是被丢弃
@@ -43,5 +47,10 @@ export default async function HomePage() {
     subCategories: category.subCategories.filter((sub) => activeSubCategoryIds.has(sub.id)),
   }));
 
-  return <MainContent categories={categoriesWithSubs} links={resolvedLinks} config={config} />;
+  return (
+    <>
+      {dataUnavailable && <DataUnavailableBanner />}
+      <MainContent categories={categoriesWithSubs} links={resolvedLinks} config={config} />
+    </>
+  );
 }

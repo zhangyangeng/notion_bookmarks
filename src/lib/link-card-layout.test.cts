@@ -13,12 +13,13 @@ function readProjectFile(filePath: string) {
 test('链接卡片把标签固定在卡片底部区域', () => {
   const linkCard = readProjectFile('src/components/ui/LinkCard.tsx');
 
+  // 断言类名序列而非源码字面量：引号风格由 prettier 决定（singleQuote），不该被测试锁死
   assert.ok(
-    linkCard.includes('"group flex h-full flex-col p-4'),
-    'LinkCard 根节点需要是占满高度的纵向 flex 容器'
+    /["']group flex h-full flex-col p-4/.test(linkCard),
+    'LinkCard 根节点需要是占满高度的纵向 flex 容器',
   );
   assert.ok(
-    linkCard.includes('className="flex flex-wrap gap-1.5 mt-auto flex-shrink-0"'),
-    '标签行需要用 mt-auto 吸收上方剩余空间并停在底部'
+    /className=["']flex flex-wrap gap-1\.5 mt-auto flex-shrink-0["']/.test(linkCard),
+    '标签行需要用 mt-auto 吸收上方剩余空间并停在底部',
   );
 });

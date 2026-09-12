@@ -67,9 +67,9 @@ export const getLinks = cache(async () => {
 
     // 对链接进行排序：先按是否置顶，再按创建时间
     allLinks.sort((a, b) => {
-      // 检查是否包含"力荐👍"
-      const aIsTop = a.tags.includes('力荐👍');
-      const bIsTop = b.tags.includes('力荐👍');
+      // 带「推荐」标签的排在前面
+      const aIsTop = a.tags.includes('推荐');
+      const bIsTop = b.tags.includes('推荐');
 
       // 如果置顶状态不同，置顶的排在前面
       if (aIsTop !== bIsTop) {

@@ -179,16 +179,16 @@ const LinkCard = memo(
                 <span
                   key={tag}
                   className={cn(
-                    'link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors',
-                    tag.includes('力荐') && 'link-tag-featured',
+                    'inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors',
+                    tag === '推荐' && 'link-tag-featured font-medium',
                   )}
                   title={tag}
                 >
-                  <span className="link-tag-label truncate max-w-[80px]">{tag}</span>
+                  <span className="truncate max-w-[80px]">{tag}</span>
                 </span>
               ))}
               {link.tags.length > 3 && (
-                <span className="link-tag inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors shrink-0">
+                <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-muted/40 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary/90 transition-colors shrink-0">
                   +{link.tags.length - 3}
                 </span>
               )}

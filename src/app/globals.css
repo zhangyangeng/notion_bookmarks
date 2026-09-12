@@ -74,6 +74,18 @@
   }
 }
 
+/*
+ * 「推荐」标签的强调样式。
+ * NOTE: 用 color-mix 而非 tailwind 的 `bg-primary/15` —— 配色在 tailwind 配置里是
+ *       `var(--x)` 直接引用，缺少 <alpha-value> 占位符，透明度修饰符不生成任何 CSS。
+ */
+@layer components {
+  .link-tag-featured {
+    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+    color: var(--primary);
+  }
+}
+
 @keyframes highlight {
   0% {
     background-color: transparent;

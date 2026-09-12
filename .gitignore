@@ -53,15 +53,15 @@ yarn-error.log*
 # Trae AI IDE files
 .trae/
 
-# Claude Code files (internal AI collaboration)
+# AI 工具的本地工作目录（临时产物，不入库）
 .claude/
-AGENTS.md
-CLAUDE.md
-
-# OpenSpec project planning (internal use)
+.workbuddy/
 openspec/
-
-# Local Codex planning and visual QA artifacts
-docs/
 outputs/
 design-qa.md
+
+# 注意：以下内容必须保持纳入版本控制，不要重新加入忽略列表
+#   AGENTS.md / CLAUDE.md / GEMINI.md  —— 三个 Agent 规范入口软链接
+#   .agents/                          —— 规范正文（单一事实源）
+#   docs/                             —— 项目决策记录（定位判断、审计结果、改造方案）
+# 这些是需要跨设备、跨 AI 工具共享的内容，本地忽略会导致换机器后规范与决策全部丢失。

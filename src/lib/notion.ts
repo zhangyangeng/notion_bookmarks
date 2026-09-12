@@ -23,6 +23,11 @@ export const notion = new Client({
 
 export const revalidate = parseInt(process.env.REVALIDATE_TIME ?? '43200', 10);
 
+// 可见性白名单：只有 `公开` 会被展示，其余值（含未填）一律不展示。
+// 用白名单而非黑名单，是为了 fail-closed —— 条目漏填时默认不公开，而不是默认公开。
+const VISIBILITY_PROPERTY = '可见性';
+const VISIBILITY_PUBLIC = '公开';
+
 // 获取网址链接
 export const getLinks = cache(async () => {
   const databaseId = envConfig.NOTION_LINKS_DB_ID!;
@@ -35,6 +40,12 @@ export const getLinks = cache(async () => {
       const response = await notion.databases.query({
         database_id: databaseId,
         start_cursor: nextCursor,
+        filter: {
+          property: VISIBILITY_PROPERTY,
+          select: {
+            equals: VISIBILITY_PUBLIC,
+          },
+        },
         sorts: [
           {
             property: 'category1',

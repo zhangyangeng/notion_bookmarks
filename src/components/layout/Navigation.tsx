@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, memo, useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher'
-import { Rocket, ChevronDown, Globe } from 'lucide-react'
-import { CategoryIcon } from '@/components/ui/CategoryIcon'
-import { Category, WebsiteConfig } from '@/types'
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
+import { Rocket, ChevronDown, Globe } from 'lucide-react';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
+import { Category, WebsiteConfig } from '@/types';
 
 interface NavigationProps {
-  categories: Category[]
-  config: WebsiteConfig
-  selectedCategoryId: string | null
-  activeSubCategoryId: string | null
-  onNavChange: (categoryId: string, subCategoryId?: string | null) => void
+  categories: Category[];
+  config: WebsiteConfig;
+  selectedCategoryId: string | null;
+  activeSubCategoryId: string | null;
+  onNavChange: (categoryId: string, subCategoryId?: string | null) => void;
 }
 
 const defaultConfig: WebsiteConfig = {
@@ -20,15 +20,15 @@ const defaultConfig: WebsiteConfig = {
   SOCIAL_BLOG: '',
   SOCIAL_X: '',
   SOCIAL_JIKE: '',
-  SOCIAL_WEIBO: ''
-}
+  SOCIAL_WEIBO: '',
+};
 
 const Navigation = memo(function Navigation({
   categories,
   config = defaultConfig,
   selectedCategoryId,
   activeSubCategoryId,
-  onNavChange
+  onNavChange,
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
@@ -42,7 +42,7 @@ const Navigation = memo(function Navigation({
   }, [selectedCategoryId, categories]);
 
   const handleCategoryToggle = useCallback((categoryId: string) => {
-    setExpandedCategoryId(prevId => (prevId === categoryId ? null : categoryId));
+    setExpandedCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
   }, []);
 
   const handleScrollTo = useCallback((categoryId: string, subCategoryId?: string) => {
@@ -58,7 +58,7 @@ const Navigation = memo(function Navigation({
 
         window.scrollTo({
           top: rect.top + scrollTop - 100,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -66,20 +66,29 @@ const Navigation = memo(function Navigation({
     }, 0);
   }, []);
 
-  const handleCategoryClick = useCallback((category: Category) => {
-    onNavChange(category.id);
-    handleCategoryToggle(category.id);
-    handleScrollTo(category.id);
-  }, [onNavChange, handleCategoryToggle, handleScrollTo]);
+  const handleCategoryClick = useCallback(
+    (category: Category) => {
+      onNavChange(category.id);
+      handleCategoryToggle(category.id);
+      handleScrollTo(category.id);
+    },
+    [onNavChange, handleCategoryToggle, handleScrollTo],
+  );
 
-  const handleSubCategoryClick = useCallback((category: Category, subCategory: { id: string; name: string }) => {
-    onNavChange(category.id, `${category.id}-${subCategory.id}`);
-    handleScrollTo(category.id, subCategory.id);
-  }, [onNavChange, handleScrollTo]);
+  const handleSubCategoryClick = useCallback(
+    (category: Category, subCategory: { id: string; name: string }) => {
+      onNavChange(category.id, `${category.id}-${subCategory.id}`);
+      handleScrollTo(category.id, subCategory.id);
+    },
+    [onNavChange, handleScrollTo],
+  );
 
-  const handleMobileCategoryClick = useCallback((categoryId: string) => {
-    onNavChange(categoryId);
-  }, [onNavChange]);
+  const handleMobileCategoryClick = useCallback(
+    (categoryId: string) => {
+      onNavChange(categoryId);
+    },
+    [onNavChange],
+  );
 
   return (
     <>
@@ -106,15 +115,15 @@ const Navigation = memo(function Navigation({
                     key={category.id}
                     onClick={() => handleMobileCategoryClick(category.id)}
                     className={cn(
-                      "mobile-nav-category-button whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
+                      'mobile-nav-category-button whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0',
                       isMobileCategoryActive
-                        ? "mobile-nav-category-active bg-primary text-primary-foreground font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        ? 'mobile-nav-category-active bg-primary text-primary-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent',
                     )}
                   >
                     {category.name}
                   </button>
-                )
+                );
               })}
             </div>
           </div>
@@ -144,12 +153,12 @@ const Navigation = memo(function Navigation({
                   <button
                     onClick={() => handleCategoryClick(category)}
                     className={cn(
-                      "nav-category-button w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors",
+                      'nav-category-button w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors',
                       isCategoryActive
-                        ? "nav-category-active bg-primary text-primary-foreground font-medium"
+                        ? 'nav-category-active bg-primary text-primary-foreground font-medium'
                         : isCategoryExpanded
-                        ? "nav-category-expanded bg-accent"
-                        : "hover:bg-accent/50"
+                          ? 'nav-category-expanded bg-accent'
+                          : 'hover:bg-accent/50',
                     )}
                   >
                     <div className="flex items-center space-x-2">
@@ -158,8 +167,8 @@ const Navigation = memo(function Navigation({
                     </div>
                     <ChevronDown
                       className={cn(
-                        "w-4 h-4 transition-transform",
-                        expandedCategoryId === category.id ? "rotate-180" : ""
+                        'w-4 h-4 transition-transform',
+                        expandedCategoryId === category.id ? 'rotate-180' : '',
                       )}
                     />
                   </button>
@@ -173,10 +182,10 @@ const Navigation = memo(function Navigation({
                               handleSubCategoryClick(category, subCategory);
                             }}
                             className={cn(
-                              "nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm",
+                              'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm',
                               activeSubCategoryId === `${category.id}-${subCategory.id}`
-                                ? "nav-subcategory-active bg-primary text-primary-foreground font-medium"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                                ? 'nav-subcategory-active bg-primary text-primary-foreground font-medium'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-accent',
                             )}
                           >
                             {subCategory.name}
@@ -187,12 +196,12 @@ const Navigation = memo(function Navigation({
                   )}
                 </div>
               </li>
-            )
+            );
           })}
         </ul>
       </nav>
     </>
-  )
+  );
 });
 
 export default Navigation;

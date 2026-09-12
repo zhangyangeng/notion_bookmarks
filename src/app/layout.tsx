@@ -1,34 +1,34 @@
-import "./globals.css"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/ui/ThemeProvider"
-import { Metadata } from "next"
-import { Clarity } from "@/components/analytics/Clarity"
-import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics"
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import './globals.css';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
+import { Metadata } from 'next';
+import { Clarity } from '@/components/analytics/Clarity';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
-import { getWebsiteConfig } from "@/lib/notion"
-import { mergeConfig } from "@/config"
+import { getWebsiteConfig } from '@/lib/notion';
+import { mergeConfig } from '@/config';
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-}
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  const config = mergeConfig(await getWebsiteConfig())
-  
+  const config = mergeConfig(await getWebsiteConfig());
+
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
     title: {
-      default: config.SITE_TITLE || "Ezho导航",
-      template: `%s | ${config.SITE_TITLE || "Ezho工具箱"}`,
+      default: config.SITE_TITLE || 'Ezho导航',
+      template: `%s | ${config.SITE_TITLE || 'Ezho工具箱'}`,
     },
-    description: config.SITE_DESCRIPTION || "Ezho工具箱，超级个体需要知道的各种好用工具",
-    keywords: config.SITE_KEYWORDS?.split(',') || ["AI导航", "超级个体", "工具箱"],
+    description: config.SITE_DESCRIPTION || 'Ezho工具箱，超级个体需要知道的各种好用工具',
+    keywords: config.SITE_KEYWORDS?.split(',') || ['AI导航', '超级个体', '工具箱'],
     icons: {
       icon: '/favicon.ico',
     },
@@ -56,15 +56,11 @@ export async function generateMetadata(): Promise<Metadata> {
         'max-snippet': -1,
       },
     },
-  }
+  };
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const config = mergeConfig(await getWebsiteConfig())
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const config = mergeConfig(await getWebsiteConfig());
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
@@ -81,5 +77,5 @@ export default async function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

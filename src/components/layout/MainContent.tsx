@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
@@ -54,7 +54,7 @@ export default function MainContent({
       }, 1000); // 1秒后恢复滚动监听
     } else {
       // 点击一级菜单，立即将高亮设置为新分类的第一个二级菜单
-      const newCategory = categoriesWithSubs.find(c => c.id === categoryId);
+      const newCategory = categoriesWithSubs.find((c) => c.id === categoryId);
       if (newCategory && newCategory.subCategories && newCategory.subCategories.length > 0) {
         const firstSubId = `${newCategory.id}-${newCategory.subCategories[0].id}`;
         setActiveSubCategoryId(firstSubId);
@@ -70,7 +70,7 @@ export default function MainContent({
       }
 
       const sections = Array.from(
-        document.querySelectorAll('section[id] div[id]')
+        document.querySelectorAll('section[id] div[id]'),
       ) as HTMLElement[];
 
       if (sections.length === 0) return;
@@ -80,9 +80,10 @@ export default function MainContent({
       const documentHeight = document.documentElement.scrollHeight;
 
       // 优先处理滚动到底部的情况
-      if (windowHeight + scrollPosition >= documentHeight - 5) { // 5px 容差
+      if (windowHeight + scrollPosition >= documentHeight - 5) {
+        // 5px 容差
         const lastSectionId = sections[sections.length - 1].id;
-        setActiveSubCategoryId(prevId => prevId !== lastSectionId ? lastSectionId : prevId);
+        setActiveSubCategoryId((prevId) => (prevId !== lastSectionId ? lastSectionId : prevId));
         return;
       }
 
@@ -101,13 +102,12 @@ export default function MainContent({
         newActiveSubId = sections[0].id;
       }
 
-      setActiveSubCategoryId(prevId => {
+      setActiveSubCategoryId((prevId) => {
         if (prevId !== newActiveSubId) {
           return newActiveSubId;
         }
         return prevId;
       });
-
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -117,27 +117,25 @@ export default function MainContent({
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-
   }, [selectedCategoryId]);
-
 
   // 找到当前选中的分类对象，然后获取其名称
   const selectedCategoryName = useMemo(() => {
     if (!selectedCategoryId) return null;
-    const category = activeCategories.find(cat => cat.id === selectedCategoryId);
+    const category = activeCategories.find((cat) => cat.id === selectedCategoryId);
     return category ? category.name : null;
   }, [selectedCategoryId, activeCategories]);
 
   // 根据选中的一级分类名称过滤链接
   const filteredLinks = useMemo(() => {
     if (!selectedCategoryName) return [];
-    return processedLinks.filter(link => link.category1 === selectedCategoryName);
+    return processedLinks.filter((link) => link.category1 === selectedCategoryName);
   }, [processedLinks, selectedCategoryName]);
 
   // 根据选中的一级分类ID过滤分类
   const filteredCategories = useMemo(() => {
     if (!selectedCategoryId) return [];
-    return activeCategories.filter(cat => cat.id === selectedCategoryId);
+    return activeCategories.filter((cat) => cat.id === selectedCategoryId);
   }, [activeCategories, selectedCategoryId]);
 
   return (

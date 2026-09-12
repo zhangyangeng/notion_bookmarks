@@ -1,19 +1,21 @@
-'use client'
+'use client';
 
-import React, { memo } from 'react'
-import { WebsiteConfig } from '@/types'
-import { FaGithub, FaXTwitter, FaWeibo } from 'react-icons/fa6'
-import { FaBlogger } from 'react-icons/fa'
-import { cn } from '@/lib/utils'
+import React, { memo } from 'react';
+import { WebsiteConfig } from '@/types';
+import { FaGithub, FaXTwitter, FaWeibo } from 'react-icons/fa6';
+import { FaBlogger } from 'react-icons/fa';
+import { cn } from '@/lib/utils';
 
 interface FooterProps {
-  config: WebsiteConfig
-  className?: string
+  config: WebsiteConfig;
+  className?: string;
 }
 
-const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
+const Footer = memo(function Footer({ config, className = '' }: FooterProps) {
   return (
-    <footer className={`fixed bottom-0 left-0 right-0 bg-background border-t py-4 z-10 ${className}`}>
+    <footer
+      className={`fixed bottom-0 left-0 right-0 bg-background border-t py-4 z-10 ${className}`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
           <div className="flex items-center space-x-4">
@@ -63,9 +65,7 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
                   alt="即刻"
                   width={20}
                   height={20}
-                  className={cn(
-                    "filter-muted hover:filter-none transition-all"
-                  )}
+                  className={cn('filter-muted hover:filter-none transition-all')}
                   loading="lazy"
                   decoding="async"
                 />
@@ -95,9 +95,7 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
                   alt="小红书"
                   width={20}
                   height={20}
-                  className={cn(
-                    "filter-muted hover:filter-none transition-all"
-                  )}
+                  className={cn('filter-muted hover:filter-none transition-all')}
                   loading="lazy"
                   decoding="async"
                 />
@@ -115,7 +113,7 @@ const Footer = memo(function Footer({ config, className = "" }: FooterProps) {
         </div>
       </div>
     </footer>
-  )
+  );
 });
 
 export default Footer;

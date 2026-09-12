@@ -13,12 +13,6 @@ package-lock.json
 # 静态资源
 public/
 
-# 主题样式暂不纳入格式化
-# NOTE: 当前有 5 套主题（≈1679 行手写 CSS），已计划收敛到 1 套。
-#       为避免格式化即将删除的文件产生大量无意义 diff，暂时排除；
-#       主题收敛完成后请删除这条规则。
-src/themes/
-
 # 本地工具目录
 .workbuddy
 .claude

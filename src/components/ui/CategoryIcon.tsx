@@ -142,4 +142,3 @@ export function CategoryIcon({
 }
 
 export default CategoryIcon;
-

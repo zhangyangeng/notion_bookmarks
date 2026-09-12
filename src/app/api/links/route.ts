@@ -8,9 +8,6 @@ export async function GET() {
     return NextResponse.json(links);
   } catch (error) {
     console.error('获取链接失败:', error);
-    return NextResponse.json(
-      { error: '获取链接失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取链接失败' }, { status: 500 });
   }
 }

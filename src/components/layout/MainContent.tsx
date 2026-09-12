@@ -4,24 +4,19 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
+import { subCategoryAnchorId } from '@/lib/category';
 import React from 'react';
-import { Category, Link as LinkType, WebsiteConfig } from '@/types';
+import { Category, Link, WebsiteConfig } from '@/types';
 
 interface MainContentProps {
-  categoriesWithSubs: Category[];
-  processedLinks: LinkType[];
-  enabledCategories: Set<string>;
-  activeCategories: Category[];
+  /** 有一级分类的树，每个一级下只保留确有链接的二级分类 */
+  categories: Category[];
+  /** 全部已解析分类引用的链接 */
+  links: Link[];
   config: WebsiteConfig;
 }
 
-export default function MainContent({
-  categoriesWithSubs,
-  processedLinks,
-  enabledCategories,
-  activeCategories,
-  config,
-}: MainContentProps) {
+export default function MainContent({ categories, links, config }: MainContentProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
   const isClickScrolling = useRef(false);
@@ -29,15 +24,16 @@ export default function MainContent({
 
   useEffect(() => {
     // 初始化时，默认选中第一个一级和二级分类
-    if (categoriesWithSubs.length > 0 && !selectedCategoryId) {
-      const firstCategory = categoriesWithSubs[0];
+    if (categories.length > 0 && !selectedCategoryId) {
+      const firstCategory = categories[0];
       setSelectedCategoryId(firstCategory.id);
-      if (firstCategory.subCategories && firstCategory.subCategories.length > 0) {
-        const firstSubCategory = firstCategory.subCategories[0];
-        setActiveSubCategoryId(`${firstCategory.id}-${firstSubCategory.id}`);
+      if (firstCategory.subCategories.length > 0) {
+        setActiveSubCategoryId(
+          subCategoryAnchorId(firstCategory.id, firstCategory.subCategories[0].id),
+        );
       }
     }
-  }, [categoriesWithSubs, selectedCategoryId]);
+  }, [categories, selectedCategoryId]);
 
   const handleNavChange = (categoryId: string, subCategoryId?: string | null) => {
     setSelectedCategoryId(categoryId);
@@ -53,12 +49,12 @@ export default function MainContent({
         isClickScrolling.current = false;
       }, 1000); // 1秒后恢复滚动监听
     } else {
-      // 点击一级菜单，立即将高亮设置为新分类的第一个二级菜单
-      const newCategory = categoriesWithSubs.find((c) => c.id === categoryId);
-      if (newCategory && newCategory.subCategories && newCategory.subCategories.length > 0) {
-        const firstSubId = `${newCategory.id}-${newCategory.subCategories[0].id}`;
-        setActiveSubCategoryId(firstSubId);
-      }
+      // 点击一级菜单，立即将高亮设置为新分类的第一个二级菜单；没有二级则不高亮
+      const newCategory = categories.find((c) => c.id === categoryId);
+      const firstSubCategory = newCategory?.subCategories[0];
+      setActiveSubCategoryId(
+        firstSubCategory ? subCategoryAnchorId(categoryId, firstSubCategory.id) : null,
+      );
     }
   };
 
@@ -119,30 +115,24 @@ export default function MainContent({
     };
   }, [selectedCategoryId]);
 
-  // 找到当前选中的分类对象，然后获取其名称
-  const selectedCategoryName = useMemo(() => {
-    if (!selectedCategoryId) return null;
-    const category = activeCategories.find((cat) => cat.id === selectedCategoryId);
-    return category ? category.name : null;
-  }, [selectedCategoryId, activeCategories]);
+  // 找到当前选中的一级分类
+  const selectedCategory = useMemo(
+    () => categories.find((category) => category.id === selectedCategoryId) ?? null,
+    [categories, selectedCategoryId],
+  );
 
-  // 根据选中的一级分类名称过滤链接
-  const filteredLinks = useMemo(() => {
-    if (!selectedCategoryName) return [];
-    return processedLinks.filter((link) => link.category1 === selectedCategoryName);
-  }, [processedLinks, selectedCategoryName]);
-
-  // 根据选中的一级分类ID过滤分类
-  const filteredCategories = useMemo(() => {
-    if (!selectedCategoryId) return [];
-    return activeCategories.filter((cat) => cat.id === selectedCategoryId);
-  }, [activeCategories, selectedCategoryId]);
+  // 按分类记录 id 匹配，不再依赖分类名 —— 名称可能重复或被改名，记录 id 不会
+  const filteredLinks = useMemo(
+    () =>
+      selectedCategoryId ? links.filter((link) => link.category1Id === selectedCategoryId) : [],
+    [links, selectedCategoryId],
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       {/* Navigation 内部自带移动端与桌面端两套布局，此处只渲染一次 */}
       <Navigation
-        categories={categoriesWithSubs}
+        categories={categories}
         config={config}
         selectedCategoryId={selectedCategoryId}
         activeSubCategoryId={activeSubCategoryId}
@@ -150,11 +140,7 @@ export default function MainContent({
       />
       <main className="ml-0 lg:ml-[280px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
-          <LinkContainer
-            initialLinks={filteredLinks}
-            enabledCategories={enabledCategories}
-            categories={filteredCategories}
-          />
+          {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}
         </div>
       </main>
       <Footer config={config} className="fixed left-0 right-0 bottom-0 z-30" />

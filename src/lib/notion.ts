@@ -46,14 +46,12 @@ export const getLinks = cache(async () => {
             equals: VISIBILITY_PUBLIC,
           },
         },
+        // 只按创建时间取倒序，不依赖 category1 / category2 —— 这两个 Select
+        // 字段在分类迁移完成后会被移除，查询不该被它们绑住。
         sorts: [
           {
-            property: 'category1',
-            direction: 'ascending',
-          },
-          {
-            property: 'category2',
-            direction: 'ascending',
+            property: 'Created',
+            direction: 'descending',
           },
         ],
       });
@@ -174,6 +172,14 @@ export const getWebsiteConfig = cache(async () => {
   }
 });
 
+// 获取分类记录（一级与二级混排的扁平列表，层级字段已解析，组装成树由 buildCategoryTree 完成）。
+//
+// 这里**不过滤 Enabled**，取全量：上层需要区分「分类被关闭」与「分类不存在」——
+// 前者让条目整条收起，后者才落到「未分类」。过滤分别由 buildCategoryTree（管入口）
+// 与 resolveLinks（管条目）完成。详见 src/lib/category.ts。
+//
+// NOTE: 此处未做分页循环。分类库当前 44 条，远低于 Notion 单页 100 条上限；
+// 若将来超过 100 条，二级分类会被静默截断，届时需改成与 getLinks 相同的分页写法。
 export const getCategories = cache(async (): Promise<Category[]> => {
   const databaseId = envConfig.NOTION_CATEGORIES_DB_ID;
 
@@ -184,12 +190,6 @@ export const getCategories = cache(async (): Promise<Category[]> => {
   try {
     const response = await notion.databases.query({
       database_id: databaseId,
-      filter: {
-        property: 'Enabled',
-        checkbox: {
-          equals: true,
-        },
-      },
       sorts: [
         {
           property: 'Order',

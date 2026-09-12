@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { subCategoryAnchorId } from '@/lib/category';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { Rocket, ChevronDown, Globe } from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
-import { Category, WebsiteConfig } from '@/types';
+import { Category, SubCategory, WebsiteConfig } from '@/types';
 
 interface NavigationProps {
   categories: Category[];
@@ -49,7 +50,7 @@ const Navigation = memo(function Navigation({
     setTimeout(() => {
       if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-      const elementId = subCategoryId ? `${categoryId}-${subCategoryId}` : categoryId;
+      const elementId = subCategoryId ? subCategoryAnchorId(categoryId, subCategoryId) : categoryId;
       const element = document.getElementById(elementId);
 
       if (element) {
@@ -76,8 +77,8 @@ const Navigation = memo(function Navigation({
   );
 
   const handleSubCategoryClick = useCallback(
-    (category: Category, subCategory: { id: string; name: string }) => {
-      onNavChange(category.id, `${category.id}-${subCategory.id}`);
+    (category: Category, subCategory: SubCategory) => {
+      onNavChange(category.id, subCategoryAnchorId(category.id, subCategory.id));
       handleScrollTo(category.id, subCategory.id);
     },
     [onNavChange, handleScrollTo],
@@ -174,7 +175,7 @@ const Navigation = memo(function Navigation({
                   </button>
                   {isCategoryExpanded && (
                     <ul className="mt-1 ml-4 space-y-1">
-                      {(category.subCategories ?? []).map((subCategory) => (
+                      {category.subCategories.map((subCategory) => (
                         <li key={subCategory.id}>
                           <button
                             onClick={(e) => {
@@ -183,7 +184,8 @@ const Navigation = memo(function Navigation({
                             }}
                             className={cn(
                               'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm',
-                              activeSubCategoryId === `${category.id}-${subCategory.id}`
+                              activeSubCategoryId ===
+                                subCategoryAnchorId(category.id, subCategory.id)
                                 ? 'nav-subcategory-active bg-primary text-primary-foreground font-medium'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent',
                             )}

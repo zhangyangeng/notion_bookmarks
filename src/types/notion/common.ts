@@ -11,6 +11,17 @@ import {
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 
+/**
+ * 页面属性上的 relation 值。
+ * SDK 只导出了单值接口形态的 `RelationPropertyItemObjectResponse`（其 relation 是单个 id），
+ * 与页面属性里「id 数组」的形态不同且无类型名可用，故就地声明最小结构。
+ */
+export interface RelationPropertyValue {
+  type: 'relation';
+  relation: Array<{ id: string }>;
+  id: string;
+}
+
 // Type Guard for PageObjectResponse
 export function isPageObjectResponse(response: unknown): response is PageObjectResponse {
   return (
@@ -49,9 +60,18 @@ export function extractFileUrl(property: FilesPropertyItemObjectResponse | unkno
   return '';
 }
 
+/**
+ * @deprecated 当前仅被迁移期的旧 Select 分类字段使用（见 `NotionLinkTransitionalProperties`）。
+ * 分类改由 relation 承载，此提取器随旧字段一并移除。
+ */
 export function extractSelect(property: SelectPropertyItemObjectResponse | unknown): string {
   const p = property as SelectPropertyItemObjectResponse;
   return p?.select?.name ?? '';
+}
+
+export function extractRelationIds(property: RelationPropertyValue | unknown): string[] {
+  const p = property as RelationPropertyValue;
+  return p?.relation?.map((item) => item.id) ?? [];
 }
 
 export function extractMultiSelect(

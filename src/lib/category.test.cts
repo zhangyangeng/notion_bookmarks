@@ -36,6 +36,8 @@ function link(partial: Partial<Link>): Link {
     iconfile: '',
     iconlink: '',
     tags: [],
+    collectionIds: [],
+    review: '',
     ...partial,
   };
 }

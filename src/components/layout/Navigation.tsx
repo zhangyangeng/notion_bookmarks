@@ -4,7 +4,7 @@ import React, { useState, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { subCategoryAnchorId } from '@/lib/category';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { Rocket, ChevronDown, Globe } from 'lucide-react';
+import { Rocket, ChevronDown, Globe, Search } from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { Category, SubCategory, WebsiteConfig } from '@/types';
 
@@ -14,6 +14,7 @@ interface NavigationProps {
   selectedCategoryId: string | null;
   activeSubCategoryId: string | null;
   onNavChange: (categoryId: string, subCategoryId?: string | null) => void;
+  onOpenSearch?: () => void;
 }
 
 const defaultConfig: WebsiteConfig = {
@@ -30,6 +31,7 @@ const Navigation = memo(function Navigation({
   selectedCategoryId,
   activeSubCategoryId,
   onNavChange,
+  onOpenSearch,
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
@@ -140,6 +142,16 @@ const Navigation = memo(function Navigation({
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
+        {onOpenSearch && (
+          <button
+            onClick={onOpenSearch}
+            className="w-full mb-4 flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Search className="w-4 h-4 shrink-0" />
+            <span className="flex-1 text-left">搜索</span>
+            <kbd className="text-xs text-muted-foreground/70">⌘K</kbd>
+          </button>
+        )}
         <ul className="space-y-1 pb-24">
           {categories.map((category) => {
             const activeCategory = activeSubCategoryId || '';

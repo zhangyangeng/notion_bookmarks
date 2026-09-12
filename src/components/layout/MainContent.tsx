@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
+import SearchPalette from '@/components/search/SearchPalette';
 import { subCategoryAnchorId } from '@/lib/category';
 import React from 'react';
 import { Category, Link, WebsiteConfig } from '@/types';
@@ -19,6 +20,7 @@ interface MainContentProps {
 export default function MainContent({ categories, links, config }: MainContentProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -128,6 +130,20 @@ export default function MainContent({ categories, links, config }: MainContentPr
     [links, selectedCategoryId],
   );
 
+  // 搜索索引：公开面全量条目，附一级分类名帮助定位
+  const searchItems = useMemo(() => {
+    const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
+    return links.map((link) => ({
+      id: link.id,
+      name: link.name,
+      desc: link.desc,
+      url: link.url,
+      tags: link.tags,
+      review: link.review,
+      categoryName: link.category1Id ? (categoryNameById.get(link.category1Id) ?? '') : '',
+    }));
+  }, [links, categories]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       {/* Navigation 内部自带移动端与桌面端两套布局，此处只渲染一次 */}
@@ -137,7 +153,9 @@ export default function MainContent({ categories, links, config }: MainContentPr
         selectedCategoryId={selectedCategoryId}
         activeSubCategoryId={activeSubCategoryId}
         onNavChange={handleNavChange}
+        onOpenSearch={() => setSearchOpen(true)}
       />
+      <SearchPalette items={searchItems} open={searchOpen} onOpenChange={setSearchOpen} />
       <main className="ml-0 lg:ml-[280px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
           {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}

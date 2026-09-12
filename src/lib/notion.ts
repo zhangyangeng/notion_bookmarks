@@ -9,12 +9,15 @@ import {
   Link,
   WebsiteConfig,
   Category,
+  Collection,
   isNotionLinkPage,
   toLink,
   isNotionConfigPage,
   getConfigItem,
   isNotionCategoryPage,
   toCategory,
+  isNotionCollectionPage,
+  toCollection,
 } from '@/types';
 
 export const notion = new Client({
@@ -203,6 +206,35 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     return categories.sort((a, b) => a.order - b.order);
   } catch (err) {
     console.error('获取分类失败:', err);
+    return [];
+  }
+});
+
+// 获取合集记录（含 slug / 说明 / 封面 / 排序 / 可见性）。
+// 与分类库同样不做分页循环：合集数量是「朋友会问的事」，预期远低于 100 条上限。
+export const getCollections = cache(async (): Promise<Collection[]> => {
+  const databaseId = envConfig.NOTION_COLLECTIONS_DB_ID;
+
+  if (!databaseId) {
+    return [];
+  }
+
+  try {
+    const response = await notion.databases.query({
+      database_id: databaseId,
+      sorts: [
+        {
+          property: '排序',
+          direction: 'ascending',
+        },
+      ],
+    });
+
+    const collections = response.results.filter(isNotionCollectionPage).map(toCollection);
+
+    return collections.sort((a, b) => a.order - b.order);
+  } catch (err) {
+    console.error('获取合集失败:', err);
     return [];
   }
 });

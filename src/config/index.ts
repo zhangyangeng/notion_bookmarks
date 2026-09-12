@@ -21,6 +21,7 @@ export const envConfig = {
   NOTION_LINKS_DB_ID: process.env.NOTION_LINKS_DB_ID,
   NOTION_WEBSITE_CONFIG_ID: process.env.NOTION_WEBSITE_CONFIG_ID,
   NOTION_CATEGORIES_DB_ID: process.env.NOTION_CATEGORIES_DB_ID,
+  NOTION_COLLECTIONS_DB_ID: process.env.NOTION_COLLECTIONS_DB_ID,
   // 分析和统计
   CLARITY_ID: process.env.NEXT_PUBLIC_CLARITY_ID ?? '',
   GA_ID: process.env.GA_ID ?? '',

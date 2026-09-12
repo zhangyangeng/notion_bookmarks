@@ -24,6 +24,9 @@ import {
 // 这是 schema 事实而非业务逻辑，故与类型定义同处一文件，作为唯一出处被类型与转换共用。
 export const LINK_CATEGORY_RELATION = '#️⃣ 分类配置' as const;
 
+// 链接库中「合集」relation 的属性名。与合集库的「链接」是双向关联。
+export const LINK_COLLECTION_RELATION = '合集' as const;
+
 // Precise Definition of Notion Properties for Links Database
 export interface NotionLinkProperties {
   Name: TitlePropertyItemObjectResponse;
@@ -33,6 +36,8 @@ export interface NotionLinkProperties {
   iconfile: FilesPropertyItemObjectResponse;
   iconlink: UrlPropertyItemObjectResponse;
   Created: CreatedTimePropertyItemObjectResponse;
+  /** 收藏者自己的评价，不是站点自述 —— 公开面的核心资产（见设计文档 1.3） */
+  点评: RichTextPropertyItemObjectResponse;
 }
 
 /**
@@ -52,6 +57,8 @@ export interface NotionLinkProperties {
  */
 export type NotionLinkTransitionalProperties = {
   [K in typeof LINK_CATEGORY_RELATION]?: RelationPropertyValue;
+} & {
+  [K in typeof LINK_COLLECTION_RELATION]?: RelationPropertyValue;
 } & {
   /** @deprecated 旧 Select 载体，仅作迁移期回退；移除条件见本类型上方 */
   category1?: SelectPropertyItemObjectResponse;
@@ -83,6 +90,10 @@ export interface Link {
   iconfile: string;
   iconlink: string;
   tags: string[];
+  /** 合集 relation 指向的记录 id；尚未策展时为空数组 */
+  collectionIds: string[];
+  /** 收藏者点评；未填写时为空串 */
+  review: string;
 }
 
 // Type Guard
@@ -97,7 +108,8 @@ export function isNotionLinkPage(page: unknown): page is NotionLinkPage {
     'Tags' in props &&
     'iconfile' in props &&
     'iconlink' in props &&
-    'Created' in props
+    'Created' in props &&
+    '点评' in props
   );
 }
 
@@ -119,5 +131,7 @@ export function toLink(page: NotionLinkPage): Link {
     iconfile: extractFileUrl(props.iconfile),
     iconlink: extractUrl(props.iconlink),
     tags: extractMultiSelect(props.Tags),
+    collectionIds: extractRelationIds(props[LINK_COLLECTION_RELATION]),
+    review: extractRichText(props.点评),
   };
 }

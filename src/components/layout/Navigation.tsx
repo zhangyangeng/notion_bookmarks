@@ -6,7 +6,6 @@ import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher'
 import { Rocket, ChevronDown, Globe } from 'lucide-react'
 import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { Category, WebsiteConfig } from '@/types'
-import { useTheme } from 'next-themes'
 
 interface NavigationProps {
   categories: Category[]
@@ -32,7 +31,6 @@ const Navigation = memo(function Navigation({
   onNavChange
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
-  const { theme } = useTheme();
 
   useEffect(() => {
     // 当选中的分类ID变化时，自动展开该分类
@@ -90,7 +88,7 @@ const Navigation = memo(function Navigation({
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Rocket className="w-5 h-5 text-foreground" />
-            <span className="neon-title">{config.SITE_TITLE}</span>
+            <span className="font-semibold">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
@@ -110,14 +108,8 @@ const Navigation = memo(function Navigation({
                     className={cn(
                       "mobile-nav-category-button whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0",
                       isMobileCategoryActive
-                        ? theme === 'bauhaus-primary'
-                          ? "mobile-nav-category-active font-medium"
-                          : theme === 'simple-dark'
-                          ? "mobile-nav-category-active bg-accent text-foreground font-medium"
-                          : "mobile-nav-category-active bg-primary text-white font-medium"
-                        : theme === 'simple-dark'
-                          ? "bg-transparent text-muted-foreground hover:text-foreground hover:bg-accent"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        ? "mobile-nav-category-active bg-primary text-primary-foreground font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     {category.name}
@@ -129,12 +121,12 @@ const Navigation = memo(function Navigation({
         </div>
       </nav>
 
-      {/* 桌面端侧边导航 */}
-      <nav className="hidden lg:block w-[280px] flex-shrink-0 h-screen sticky top-0 p-4 overflow-y-auto border-r">
+      {/* 桌面端固定侧边导航 */}
+      <nav className="hidden lg:block fixed left-0 top-0 w-[280px] h-screen p-4 overflow-y-auto border-r bg-background z-20">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Rocket className="w-5 h-5 text-foreground" />
-            <span className="neon-title">{config.SITE_TITLE}</span>
+            <span className="font-semibold">{config.SITE_TITLE}</span>
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
@@ -154,9 +146,7 @@ const Navigation = memo(function Navigation({
                     className={cn(
                       "nav-category-button w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors",
                       isCategoryActive
-                        ? theme === 'simple-dark'
-                          ? "nav-category-active bg-accent text-foreground font-medium"
-                          : "nav-category-active bg-primary text-white font-medium"
+                        ? "nav-category-active bg-primary text-primary-foreground font-medium"
                         : isCategoryExpanded
                         ? "nav-category-expanded bg-accent"
                         : "hover:bg-accent/50"
@@ -185,9 +175,7 @@ const Navigation = memo(function Navigation({
                             className={cn(
                               "nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm",
                               activeSubCategoryId === `${category.id}-${subCategory.id}`
-                                ? theme === 'simple-dark'
-                                  ? "nav-subcategory-active bg-accent text-foreground font-medium"
-                                  : "nav-subcategory-active bg-primary text-white font-medium"
+                                ? "nav-subcategory-active bg-primary text-primary-foreground font-medium"
                                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                           >

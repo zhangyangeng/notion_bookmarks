@@ -1,7 +1,7 @@
 // src/components/LinkContainer.tsx
 "use client";
 
-import React, { useState, useEffect, useMemo, memo } from "react";
+import React, { useMemo, memo } from "react";
 import LinkCard from "@/components/ui/LinkCard";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Link, Category } from '@/types';
@@ -17,14 +17,6 @@ const LinkContainer = memo(function LinkContainer({
   enabledCategories,
   categories,
 }: LinkContainerProps) {
-  const [mounted, setMounted] = useState(false);
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-    setCurrentTime(new Date());
-  }, []);
-
   // 按一级和二级分类组织链接，只包含启用的分类
   const linksByCategory = useMemo(() => initialLinks.reduce((acc, link) => {
     const cat1 = link.category1;
@@ -41,17 +33,6 @@ const LinkContainer = memo(function LinkContainer({
     }
     return acc;
   }, {} as Record<string, Record<string, Link[]>>), [initialLinks, enabledCategories]);
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).replace(/\//g, '-');
-  };
 
   return (
     <div className="space-y-16 pb-12 w-full min-w-0">
@@ -99,11 +80,6 @@ const LinkContainer = memo(function LinkContainer({
           </section>
         );
       })}
-      {mounted && currentTime && (
-        <div className="mt-12 text-center text-sm text-muted-foreground">
-          最近更新：{formatDate(currentTime)}
-        </div>
-      )}
     </div>
   );
 });

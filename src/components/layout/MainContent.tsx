@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
-import HomeWidgets from '@/components/widgets/HomeWidgets';
 import React from 'react';
 import { Category, Link as LinkType, WebsiteConfig } from '@/types';
 
@@ -97,7 +96,7 @@ export default function MainContent({
         }
       }
 
-      // 如果滚动位置在所有区域之上（例如在顶部的widgets区域），则默认高亮第一个
+      // 如果滚动位置在所有区域之上，则默认高亮第一个
       if (newActiveSubId === null && sections.length > 0) {
         newActiveSubId = sections[0].id;
       }
@@ -143,30 +142,15 @@ export default function MainContent({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      <nav className="fixed top-0 left-0 right-0 z-30 bg-white border-b lg:hidden">
-        <Navigation
-          categories={categoriesWithSubs}
-          config={config}
-          selectedCategoryId={selectedCategoryId}
-          activeSubCategoryId={activeSubCategoryId}
-          onNavChange={handleNavChange}
-        />
-      </nav>
-      <aside className="fixed left-0 top-0 w-[300px] h-screen z-20 hidden lg:block pb-24">
-        <Navigation
-          categories={categoriesWithSubs}
-          config={config}
-          selectedCategoryId={selectedCategoryId}
-          activeSubCategoryId={activeSubCategoryId}
-          onNavChange={handleNavChange}
-        />
-      </aside>
-      <main className="ml-0 lg:ml-[300px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
-        {config.WIDGET_CONFIG && (
-          <div className="w-full">
-            <HomeWidgets config={config} />
-          </div>
-        )}
+      {/* Navigation 内部自带移动端与桌面端两套布局，此处只渲染一次 */}
+      <Navigation
+        categories={categoriesWithSubs}
+        config={config}
+        selectedCategoryId={selectedCategoryId}
+        activeSubCategoryId={activeSubCategoryId}
+        onNavChange={handleNavChange}
+      />
+      <main className="ml-0 lg:ml-[280px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
           <LinkContainer
             initialLinks={filteredLinks}

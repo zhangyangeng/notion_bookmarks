@@ -1,6 +1,4 @@
 import "./globals.css"
-import "qweather-icons/font/qweather-icons.css"
-import "@/themes/theme.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/ui/ThemeProvider"
 import { Metadata } from "next"

@@ -2,16 +2,9 @@
 
 import { Link } from '@/types';
 import { IconExternalLink } from '@tabler/icons-react';
-import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
-import {
-  FALLBACK_ICON_SRC,
-  ICON_LOAD_TIMEOUT_MS,
-  getFailedIconState,
-  getInitialIconState,
-  getLoadedIconState,
-  getTimedOutIconState,
-} from '@/lib/link-icon';
+import LinkIcon from '@/components/ui/LinkIcon';
 
 interface LinkCardProps {
   link: Link;
@@ -19,90 +12,8 @@ interface LinkCardProps {
   style?: React.CSSProperties;
 }
 
-// 独立的图标组件，事件驱动加载，杜绝任何定时器轮询
-const OptimisedLinkIcon = memo(
-  function OptimisedLinkIcon({
-    src,
-    alt,
-    onLoad,
-    onError,
-  }: {
-    src: string;
-    alt: string;
-    onLoad?: () => void;
-    onError: () => void;
-  }) {
-    const imageRef = useRef<HTMLImageElement>(null);
-
-    // 仅在初始挂载或 src 改变时检查已完成的缓存图片，不使用 setInterval 轮询
-    useEffect(() => {
-      const image = imageRef.current;
-      if (!image) return;
-
-      if (image.complete) {
-        if (image.naturalWidth > 0) {
-          onLoad?.();
-        } else {
-          onError();
-        }
-      }
-    }, [src, onLoad, onError]);
-
-    return (
-      // 使用原生 img，避免 Vercel Image Optimization 免费额度消耗与额外开销
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        ref={imageRef}
-        src={src}
-        alt={alt}
-        className="w-full h-full object-contain transition-opacity duration-200"
-        onLoad={onLoad}
-        onError={onError}
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
-      />
-    );
-  },
-  (prev, next) => prev.src === next.src && prev.alt === next.alt,
-);
-
 const LinkCard = memo(
   function LinkCard({ link, className, style }: LinkCardProps) {
-    const [iconState, setIconState] = useState(() => getInitialIconState(link));
-    const iconContainerRef = useRef<HTMLDivElement>(null);
-
-    const handleImageError = useCallback(() => {
-      setIconState(getFailedIconState());
-    }, []);
-
-    const handleImageLoad = useCallback(() => {
-      setIconState((state) => getLoadedIconState(state));
-    }, []);
-
-    // 当 link 变化时更新图片源
-    useEffect(() => {
-      setIconState(getInitialIconState(link));
-    }, [link]);
-
-    // 超时降级单次定时器（无轮询）
-    useEffect(() => {
-      if (iconState.isLoaded || iconState.src === FALLBACK_ICON_SRC) {
-        return;
-      }
-
-      const timeoutId = window.setTimeout(() => {
-        setIconState((state) => {
-          if (state.isLoaded || state.src === FALLBACK_ICON_SRC) {
-            return state;
-          }
-          return getTimedOutIconState(state);
-        });
-      }, ICON_LOAD_TIMEOUT_MS);
-
-      return () => window.clearTimeout(timeoutId);
-    }, [iconState.isLoaded, iconState.src]);
-
     return (
       <a
         href={link.url}
@@ -117,30 +28,8 @@ const LinkCard = memo(
           className,
         )}
       >
-        {/* 图标（左） */}
-        <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted p-2">
-          <div ref={iconContainerRef} className="icon-container relative w-full h-full">
-            {iconState.showFallback && (
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 bg-center bg-contain bg-no-repeat opacity-70"
-                style={{ backgroundImage: `url(${FALLBACK_ICON_SRC})` }}
-              />
-            )}
-            <OptimisedLinkIcon
-              src={iconState.src}
-              alt={link.name}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-            />
-
-            {iconState.showSpinner && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
-                <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* 图标（左）：不给容器铺底色，异形 logo 不再顶着方块 */}
+        <LinkIcon link={link} className="w-14 h-14 rounded-lg" />
 
         {/* 内容（右） */}
         <div className="flex-1 min-w-0 flex flex-col h-full gap-1.5">

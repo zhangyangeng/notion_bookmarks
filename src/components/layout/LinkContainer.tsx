@@ -15,7 +15,7 @@ interface LinkContainerProps {
 }
 
 const CARD_GRID_CLASS =
-  'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full';
+  'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 w-full';
 
 const LinkContainer = memo(function LinkContainer({ category, links }: LinkContainerProps) {
   // 按二级分类分组。relation 只指到一级的条目没有二级，单独平铺在一级标题下，
@@ -60,8 +60,13 @@ const LinkContainer = memo(function LinkContainer({ category, links }: LinkConta
       <div className="space-y-12">
         {ungrouped.length > 0 && (
           <div className={CARD_GRID_CLASS}>
-            {ungrouped.map((link) => (
-              <LinkCard key={link.id} link={link} className="w-full" />
+            {ungrouped.map((link, i) => (
+              <LinkCard
+                key={link.id}
+                link={link}
+                className="w-full card-enter"
+                style={{ '--i': i } as React.CSSProperties}
+              />
             ))}
           </div>
         )}
@@ -78,8 +83,13 @@ const LinkContainer = memo(function LinkContainer({ category, links }: LinkConta
               <div className="text-sm text-muted-foreground">({subCategoryLinks.length})</div>
             </div>
             <div className={CARD_GRID_CLASS}>
-              {subCategoryLinks.map((link) => (
-                <LinkCard key={link.id} link={link} className="w-full" />
+              {subCategoryLinks.map((link, i) => (
+                <LinkCard
+                  key={link.id}
+                  link={link}
+                  className="w-full card-enter"
+                  style={{ '--i': i } as React.CSSProperties}
+                />
               ))}
             </div>
           </div>

@@ -16,6 +16,7 @@ import {
 interface LinkCardProps {
   link: Link;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 // 独立的图标组件，事件驱动加载，杜绝任何定时器轮询
@@ -67,7 +68,7 @@ const OptimisedLinkIcon = memo(
 );
 
 const LinkCard = memo(
-  function LinkCard({ link, className }: LinkCardProps) {
+  function LinkCard({ link, className, style }: LinkCardProps) {
     const [iconState, setIconState] = useState(() => getInitialIconState(link));
     const iconContainerRef = useRef<HTMLDivElement>(null);
 
@@ -107,6 +108,7 @@ const LinkCard = memo(
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
+        style={style}
         className={cn(
           'group flex h-full min-h-[120px] items-start gap-4 p-4 rounded-lg bg-card shadow-sm',
           'transition-all duration-200 hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.98]',

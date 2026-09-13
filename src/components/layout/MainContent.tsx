@@ -25,9 +25,9 @@ const SIDEBAR_STORAGE_KEY = 'nav.sidebar-state';
 
 /** 各态对应的内容区左侧外边距（与 Navigation 侧栏宽度保持一致） */
 const SIDEBAR_MARGIN: Record<SidebarState, string> = {
-  expanded: 'lg:ml-[280px]',
-  icons: 'lg:ml-[64px]',
-  hidden: 'lg:ml-0',
+  expanded: 'md:ml-[280px]',
+  icons: 'md:ml-[64px]',
+  hidden: 'md:ml-0',
 };
 
 function readSidebarState(): SidebarState {
@@ -199,11 +199,11 @@ export default function MainContent({ categories, links, config }: MainContentPr
       <SearchPalette items={searchItems} open={searchOpen} onOpenChange={setSearchOpen} />
       <main
         className={cn(
-          'ml-0 pt-[56px] lg:pt-4 min-h-screen flex flex-col transition-[margin] duration-200',
+          'ml-0 pt-[56px] md:pt-4 min-h-screen flex flex-col transition-[margin] duration-200',
           SIDEBAR_MARGIN[sidebarState],
         )}
       >
-        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
+        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 md:pt-0 pb-24 pt-16">
           {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}
         </div>
       </main>

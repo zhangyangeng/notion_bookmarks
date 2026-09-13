@@ -4,7 +4,16 @@ import React, { useState, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { subCategoryAnchorId } from '@/lib/category';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { Rocket, ChevronDown, Globe, Search, PanelLeft, PanelLeftClose } from 'lucide-react';
+import {
+  Rocket,
+  ChevronDown,
+  Globe,
+  Search,
+  PanelLeft,
+  PanelLeftClose,
+  Menu,
+  X,
+} from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { Category, SubCategory, WebsiteConfig } from '@/types';
 import type { SidebarState } from './MainContent';
@@ -43,6 +52,7 @@ const Navigation = memo(function Navigation({
   onSidebarStateChange,
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const isCollapsed = sidebarState === 'icons';
   const isHidden = sidebarState === 'hidden';
@@ -111,6 +121,7 @@ const Navigation = memo(function Navigation({
   const handleMobileCategoryClick = useCallback(
     (categoryId: string) => {
       onNavChange(categoryId);
+      setMobileDrawerOpen(false);
     },
     [onNavChange],
   );
@@ -118,48 +129,100 @@ const Navigation = memo(function Navigation({
   return (
     <>
       {/* 移动端顶部导航 */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 border-b glass-surface">
+      <nav className="md:hidden fixed top-0 left-0 right-0 z-20 border-b glass-surface">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Rocket className="w-5 h-5 text-foreground" />
             <span className="font-semibold">{config.SITE_TITLE}</span>
           </div>
-          {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
-        </div>
-        <div className="overflow-x-auto flex items-center h-12 border-t border-border/50 scrollbar-none">
-          <div className="flex px-4 min-w-full">
-            <div className="flex space-x-2 mx-auto">
-              {categories.map((category) => {
-                const activeCategory = activeSubCategoryId || '';
-                const isMobileCategoryActive =
-                  selectedCategoryId === category.id ||
-                  (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
-
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => handleMobileCategoryClick(category.id)}
-                    className={cn(
-                      'mobile-nav-category-button whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0',
-                      isMobileCategoryActive
-                        ? 'mobile-nav-category-active bg-primary/10 text-foreground font-medium'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-                    )}
-                  >
-                    {category.name}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex items-center space-x-1">
+            {onOpenSearch && (
+              <button
+                onClick={onOpenSearch}
+                className="p-2 rounded-lg hover:bg-accent transition-colors"
+                title="搜索"
+                aria-label="搜索"
+              >
+                <Search className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+            {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
+            <button
+              onClick={() => setMobileDrawerOpen(true)}
+              className="p-2 rounded-lg hover:bg-accent transition-colors"
+              title="分类"
+              aria-label="打开分类"
+            >
+              <Menu className="w-5 h-5 text-muted-foreground" />
+            </button>
           </div>
         </div>
       </nav>
+
+      {/* 移动端底部抽屉：分类列表 */}
+      {mobileDrawerOpen && (
+        <div className="md:hidden fixed inset-0 z-40" role="dialog" aria-modal="true">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] overflow-y-auto rounded-t-2xl glass-surface border-t border-border/50 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-medium">分类</span>
+              <button
+                onClick={() => setMobileDrawerOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+                aria-label="关闭"
+              >
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+            <ul className="space-y-1 pb-4">
+              {categories.map((category) => {
+                const activeCategory = activeSubCategoryId || '';
+                const isCategoryActive =
+                  selectedCategoryId === category.id ||
+                  (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
+                const count = categoryLinkCounts[category.id];
+
+                return (
+                  <li key={category.id}>
+                    <button
+                      onClick={() => handleMobileCategoryClick(category.id)}
+                      className={cn(
+                        'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors relative',
+                        isCategoryActive
+                          ? 'bg-primary/10 text-foreground font-medium'
+                          : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+                      )}
+                    >
+                      {isCategoryActive && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                        />
+                      )}
+                      <span className="flex items-center space-x-2">
+                        <CategoryIcon name={category.iconName} className="w-4 h-4" fallback={Globe} />
+                        <span>{category.name}</span>
+                      </span>
+                      {typeof count === 'number' && (
+                        <span className="text-xs text-muted-foreground">{count}</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* 桌面端固定侧边导航 */}
       {!isHidden && (
         <nav
           className={cn(
-            'hidden lg:block fixed left-0 top-0 h-screen overflow-y-auto border-r border-border/50 glass-surface z-20 transition-[width] duration-200',
+            'hidden md:block fixed left-0 top-0 h-screen overflow-y-auto border-r border-border/50 glass-surface z-20 transition-[width] duration-200',
             isCollapsed ? 'w-[64px] p-2' : 'w-[280px] p-4',
           )}
         >
@@ -332,7 +395,7 @@ const Navigation = memo(function Navigation({
       {isHidden && (
         <button
           onClick={handleFoldToggle}
-          className="hidden lg:flex fixed left-3 top-3 z-30 p-2.5 rounded-lg glass-surface hover:bg-accent transition-colors"
+          className="hidden md:flex fixed left-3 top-3 z-30 p-2.5 rounded-lg glass-surface hover:bg-accent transition-colors"
           title="展开侧栏"
           aria-label="展开侧栏"
         >

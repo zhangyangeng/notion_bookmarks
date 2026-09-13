@@ -11,6 +11,7 @@ import {
   Search,
   PanelLeft,
   PanelLeftClose,
+  ChevronsLeft,
   Menu,
   X,
 } from 'lucide-react';
@@ -58,14 +59,13 @@ const Navigation = memo(function Navigation({
   const isHidden = sidebarState === 'hidden';
 
   const handleFoldToggle = useCallback(() => {
-    if (sidebarState === 'expanded') {
-      onSidebarStateChange('icons');
-    } else if (sidebarState === 'icons') {
-      onSidebarStateChange('hidden');
-    } else {
-      onSidebarStateChange('expanded');
-    }
+    // 二态切换：只在「展开」与「窄图标栏」之间往返，不再进入隐藏态
+    onSidebarStateChange(sidebarState === 'expanded' ? 'icons' : 'expanded');
   }, [sidebarState, onSidebarStateChange]);
+
+  const handleHide = useCallback(() => {
+    onSidebarStateChange('hidden');
+  }, [onSidebarStateChange]);
 
   useEffect(() => {
     // 当选中的分类ID变化时，自动展开该分类
@@ -226,7 +226,7 @@ const Navigation = memo(function Navigation({
       {!isHidden && (
         <nav
           className={cn(
-            'hidden md:block fixed left-0 top-0 h-screen overflow-y-auto border-r border-border/50 glass-surface z-20 transition-[width] duration-200',
+            'hidden md:block fixed left-0 top-0 h-screen overflow-y-auto border-r border-border/20 glass-surface z-20 transition-[width] duration-200',
             isCollapsed ? 'w-[64px] p-2' : 'w-[280px] p-4',
           )}
         >
@@ -279,6 +279,17 @@ const Navigation = memo(function Navigation({
                   );
                 })}
               </ul>
+              {/* 底部：彻底隐藏侧栏 */}
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleHide}
+                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  title="隐藏侧栏"
+                  aria-label="隐藏侧栏"
+                >
+                  <ChevronsLeft className="w-5 h-5 text-muted-foreground" />
+                </button>
+              </div>
             </>
           ) : (
             /* 展开侧栏 */
@@ -293,10 +304,18 @@ const Navigation = memo(function Navigation({
                   <button
                     onClick={handleFoldToggle}
                     className="p-1.5 rounded-lg hover:bg-accent transition-colors"
-                    title="折叠侧栏"
-                    aria-label="折叠侧栏"
+                    title="收起为窄栏"
+                    aria-label="收起为窄栏"
                   >
                     <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                  <button
+                    onClick={handleHide}
+                    className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+                    title="隐藏侧栏"
+                    aria-label="隐藏侧栏"
+                  >
+                    <ChevronsLeft className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
               </div>

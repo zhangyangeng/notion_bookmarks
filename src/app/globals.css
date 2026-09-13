@@ -78,41 +78,32 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family: var(--font-sans);
+    /*
+     * 底色 + 彩色光斑直接铺在 body 背景上（而非 -1 层伪元素），
+     * 这样玻璃面的 rgba 半透明背景能直接透出光斑。
+     * radial-gradient 用 fixed 附着，不参与滚动合成，几乎零性能损耗。
+     */
+    background-color: var(--background);
+    background-image:
+      radial-gradient(46% 46% at 8% 10%, rgba(95, 130, 95, 0.18), transparent 70%),
+      radial-gradient(40% 40% at 92% 18%, rgba(150, 135, 80, 0.14), transparent 70%),
+      radial-gradient(50% 50% at 30% 85%, rgba(70, 110, 120, 0.14), transparent 70%);
+    background-attachment: fixed;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(46% 46% at 8% 10%, rgba(80, 120, 85, 0.16), transparent 70%),
+      radial-gradient(40% 40% at 92% 18%, rgba(130, 115, 70, 0.12), transparent 70%),
+      radial-gradient(50% 50% at 30% 85%, rgba(60, 100, 110, 0.14), transparent 70%);
+    background-attachment: fixed;
   }
 }
 
-/*
- * 彩色光斑背景层：让玻璃面有东西可透。
- * NOTE: 光斑必须铺在玻璃面正下方才能被 backdrop-filter 透出；
- *       这里作为 body 的 fixed 背景，侧栏/面板等玻璃面直接叠在其上。
- *       background-attachment: fixed 不参与滚动合成，几乎零性能损耗。
- */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(46% 46% at 8% 10%, rgba(95, 130, 95, 0.16), transparent 70%),
-    radial-gradient(40% 40% at 92% 18%, rgba(150, 135, 80, 0.12), transparent 70%),
-    radial-gradient(50% 50% at 30% 85%, rgba(70, 110, 120, 0.12), transparent 70%);
-  background-attachment: fixed;
-}
-
-.dark body::before {
-  background:
-    radial-gradient(46% 46% at 8% 10%, rgba(80, 120, 85, 0.14), transparent 70%),
-    radial-gradient(40% 40% at 92% 18%, rgba(130, 115, 70, 0.1), transparent 70%),
-    radial-gradient(50% 50% at 30% 85%, rgba(60, 100, 110, 0.12), transparent 70%);
-  background-attachment: fixed;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  body::before {
-    background: none;
+  body {
+    background-image: none;
   }
 }
 

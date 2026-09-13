@@ -183,7 +183,7 @@ export default function MainContent({ categories, links, config }: MainContentPr
   }, [links, categories]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+    <div className="min-h-screen">
       {/* Navigation 内部自带移动端与桌面端两套布局，此处只渲染一次 */}
       <Navigation
         categories={categories}

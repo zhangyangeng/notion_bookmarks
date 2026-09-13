@@ -51,11 +51,14 @@ export default {
           DEFAULT: 'rgb(var(--card) / <alpha-value>)',
           foreground: 'rgb(var(--card-foreground) / <alpha-value>)',
         },
+        warm: 'rgb(var(--warm) / <alpha-value>)',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        // 导航项专用：比卡片圆角小，否则选中竖条会被大圆弧两端裁短
+        nav: '0.625rem',
       },
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],

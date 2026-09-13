@@ -108,9 +108,7 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
             placeholder="搜索站点名称、描述、标签、点评…"
             className="flex-1 h-12 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
           />
-          <kbd className="hidden sm:inline-flex text-xs text-muted-foreground border border-border/50 rounded px-1.5 py-0.5">
-            Esc
-          </kbd>
+          <kbd className="kbd hidden sm:inline-flex">Esc</kbd>
         </div>
 
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-1">

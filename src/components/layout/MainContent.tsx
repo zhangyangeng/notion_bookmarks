@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
@@ -16,33 +16,56 @@ interface MainContentProps {
   /** 全部已解析分类引用的链接 */
   links: Link[];
   config: WebsiteConfig;
+  /** 当前年份。服务端计算后传入，供页脚版权使用 */
+  year: number;
 }
 
-/** 侧栏折叠三态：展开 / 窄图标栏 / 隐藏 */
-export type SidebarState = 'expanded' | 'icons' | 'hidden';
+/** 侧栏二态：展开 / 窄图标栏 */
+export type SidebarState = 'expanded' | 'icons';
 
 const SIDEBAR_STORAGE_KEY = 'nav.sidebar-state';
 
-/** 各态对应的内容区左侧外边距（与 Navigation 侧栏宽度保持一致） */
+/**
+ * 各态对应的内容区左侧外边距。
+ * NOTE: 侧栏为浮起面板（left-3 + 自身宽 + right 侧 12px 间隙），
+ *       故外边距 = 侧栏宽 + 24px，两处必须同步改。
+ */
 const SIDEBAR_MARGIN: Record<SidebarState, string> = {
-  expanded: 'md:ml-[280px]',
-  icons: 'md:ml-[64px]',
-  hidden: 'md:ml-0',
+  expanded: 'md:ml-[304px]',
+  icons: 'md:ml-[88px]',
 };
 
 function readSidebarState(): SidebarState {
   if (typeof window === 'undefined') return 'expanded';
+  // 历史版本存过 'hidden'，该态已移除，读到的旧值回落到展开态
   const saved = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
-  return saved === 'icons' || saved === 'hidden' ? saved : 'expanded';
+  return saved === 'icons' ? 'icons' : 'expanded';
 }
 
-export default function MainContent({ categories, links, config }: MainContentProps) {
+/**
+ * 服务端没有 localStorage，storage 只能在浏览器侧读。
+ * NOTE: 用 layout effect 而非 useEffect —— 它在浏览器绘制前同步补上真实状态，
+ *       避免用户先看到一帧展开态再折叠（useEffect 在绘制后才跑，会有可见闪烁）。
+ *       服务端则回落到 useEffect，规避 React 对服务端调用 useLayoutEffect 的警告。
+ */
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+export default function MainContent({ categories, links, config, year }: MainContentProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [sidebarState, setSidebarState] = useState<SidebarState>(readSidebarState);
+  /*
+   * 首帧恒为 'expanded'：服务端渲染的就是这个值，客户端首帧必须与之一致，否则 hydration 报错。
+   * 真实状态在下方 layout effect 中于绘制前补齐。
+   */
+  const [sidebarState, setSidebarState] = useState<SidebarState>('expanded');
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const saved = readSidebarState();
+    setSidebarState((prev) => (prev === saved ? prev : saved));
+  }, []);
 
   const handleSidebarStateChange = (state: SidebarState) => {
     setSidebarState(state);
@@ -203,11 +226,13 @@ export default function MainContent({ categories, links, config }: MainContentPr
           SIDEBAR_MARGIN[sidebarState],
         )}
       >
-        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 md:pt-0 pb-24 pt-16">
+        {/* pb-20：给浮起底部条（12px 外边距 + 约 44px 高）留位，不遮挡最后一行卡片 */}
+        <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 md:pt-0 pb-20 pt-16">
           {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}
         </div>
       </main>
-      <Footer config={config} className="fixed left-0 right-0 bottom-0 z-30" />
+      {/* 底部浮起条与内容区共用同一套侧栏让位，避免压住侧栏圆角 */}
+      <Footer config={config} className={SIDEBAR_MARGIN[sidebarState]} year={year} />
     </div>
   );
 }

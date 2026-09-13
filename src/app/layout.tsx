@@ -1,5 +1,6 @@
 import './globals.css';
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
+import BackToTop from '@/components/ui/BackToTop';
 import { Metadata } from 'next';
 import { Clarity } from '@/components/analytics/Clarity';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
@@ -69,6 +70,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <ThemeProvider>
           {children}
+          {/* 挂在根布局：首页与分享页共用同一个回到顶部入口 */}
+          <BackToTop />
           <Analytics />
           <SpeedInsights />
         </ThemeProvider>

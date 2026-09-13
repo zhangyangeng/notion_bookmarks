@@ -50,7 +50,14 @@ export default async function HomePage() {
   return (
     <>
       {dataUnavailable && <DataUnavailableBanner />}
-      <MainContent categories={categoriesWithSubs} links={resolvedLinks} config={config} />
+      <MainContent
+        categories={categoriesWithSubs}
+        links={resolvedLinks}
+        config={config}
+        /* 年份在服务端算好再传：客户端取值会让首屏与服务端渲染不一致，
+           ISR 10 分钟一刷，缓存的 HTML 里的年份不会过期到影响显示 */
+        year={new Date().getFullYear()}
+      />
     </>
   );
 }

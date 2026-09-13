@@ -40,7 +40,7 @@
     --highlight-bg: 63 92 74;
 
     /* 玻璃面：用于侧栏 / 搜索面板 / 命令面板 / 详情浮层 */
-    --glass-bg: rgba(251, 250, 245, 0.5);
+    --glass-bg: rgba(251, 250, 245, 0.72);
     --glass-border: rgba(255, 255, 255, 0.55);
     --glass-shadow: 0 8px 24px rgba(60, 80, 60, 0.1);
   }
@@ -67,7 +67,7 @@
     --ring: 147 184 155;
     --highlight-bg: 147 184 155;
 
-    --glass-bg: rgba(36, 41, 36, 0.55);
+    --glass-bg: rgba(36, 41, 36, 0.72);
     --glass-border: rgba(255, 255, 255, 0.12);
     --glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
@@ -125,6 +125,18 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     box-shadow: var(--glass-shadow);
+  }
+
+  /*
+   * 卡片轻玻璃：比 .glass-surface 更「实」（背景几乎不透明），blur 更弱，
+   * 避免 223 张卡都背上高成本 blur。仍带一层极淡的玻璃透感与阴影分层。
+   */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    box-shadow: 0 1px 3px rgba(60, 80, 60, 0.08), 0 4px 12px rgba(60, 80, 60, 0.06);
   }
 }
 

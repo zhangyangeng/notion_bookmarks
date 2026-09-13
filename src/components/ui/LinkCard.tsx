@@ -110,7 +110,7 @@ const LinkCard = memo(
         rel="noopener noreferrer"
         style={style}
         className={cn(
-          'group flex h-full min-h-[120px] items-start gap-4 p-4 rounded-lg bg-card shadow-sm',
+          'group flex h-full min-h-[120px] items-start gap-4 p-4 rounded-lg glass-card',
           'transition-all duration-200 hover:-translate-y-1 hover:scale-[1.01] active:scale-[0.98]',
           'hover:shadow-xl hover:shadow-primary/10',
           'w-full max-w-full',

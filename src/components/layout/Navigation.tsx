@@ -4,9 +4,10 @@ import React, { useState, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { subCategoryAnchorId } from '@/lib/category';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { Rocket, ChevronDown, Globe, Search } from 'lucide-react';
+import { Rocket, ChevronDown, Globe, Search, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { Category, SubCategory, WebsiteConfig } from '@/types';
+import type { SidebarState } from './MainContent';
 
 interface NavigationProps {
   categories: Category[];
@@ -17,6 +18,9 @@ interface NavigationProps {
   onOpenSearch?: () => void;
   /** 每个一级分类下的链接数，用于侧栏计数 badge */
   categoryLinkCounts?: Record<string, number>;
+  /** 侧栏折叠态（由 MainContent 提升管理，跨组件共享） */
+  sidebarState: SidebarState;
+  onSidebarStateChange: (state: SidebarState) => void;
 }
 
 const defaultConfig: WebsiteConfig = {
@@ -35,8 +39,23 @@ const Navigation = memo(function Navigation({
   onNavChange,
   onOpenSearch,
   categoryLinkCounts = {},
+  sidebarState,
+  onSidebarStateChange,
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+
+  const isCollapsed = sidebarState === 'icons';
+  const isHidden = sidebarState === 'hidden';
+
+  const handleFoldToggle = useCallback(() => {
+    if (sidebarState === 'expanded') {
+      onSidebarStateChange('icons');
+    } else if (sidebarState === 'icons') {
+      onSidebarStateChange('hidden');
+    } else {
+      onSidebarStateChange('expanded');
+    }
+  }, [sidebarState, onSidebarStateChange]);
 
   useEffect(() => {
     // 当选中的分类ID变化时，自动展开该分类
@@ -137,105 +156,189 @@ const Navigation = memo(function Navigation({
       </nav>
 
       {/* 桌面端固定侧边导航 */}
-      <nav className="hidden lg:block fixed left-0 top-0 w-[280px] h-screen p-4 overflow-y-auto border-r border-border/50 glass-surface z-20">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-2">
-            <Rocket className="w-5 h-5 text-foreground" />
-            <span className="font-semibold">{config.SITE_TITLE}</span>
-          </div>
-          {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
-        </div>
-        {onOpenSearch && (
-          <button
-            onClick={onOpenSearch}
-            className="w-full mb-4 flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          >
-            <Search className="w-4 h-4 shrink-0" />
-            <span className="flex-1 text-left">搜索</span>
-            <kbd className="text-xs text-muted-foreground/70">⌘K</kbd>
-          </button>
-        )}
-        <ul className="space-y-1 pb-24">
-          {categories.map((category) => {
-            const activeCategory = activeSubCategoryId || '';
-            const isCategoryActive =
-              selectedCategoryId === category.id ||
-              (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
-            const isCategoryExpanded = expandedCategoryId === category.id;
-            const count = categoryLinkCounts[category.id];
+      {!isHidden && (
+        <nav
+          className={cn(
+            'hidden lg:block fixed left-0 top-0 h-screen overflow-y-auto border-r border-border/50 glass-surface z-20 transition-[width] duration-200',
+            isCollapsed ? 'w-[64px] p-2' : 'w-[280px] p-4',
+          )}
+        >
+          {isCollapsed ? (
+            /* 窄图标栏：仅图标 + 计数 badge，悬停显示分类名 */
+            <>
+              <div className="flex flex-col items-center gap-2 mb-6">
+                <button
+                  onClick={handleFoldToggle}
+                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  title="展开侧栏"
+                  aria-label="展开侧栏"
+                >
+                  <PanelLeft className="w-5 h-5 text-muted-foreground" />
+                </button>
+                {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
+              </div>
+              <ul className="space-y-1">
+                {categories.map((category) => {
+                  const activeCategory = activeSubCategoryId || '';
+                  const isCategoryActive =
+                    selectedCategoryId === category.id ||
+                    (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
 
-            return (
-              <li key={category.id}>
-                <div className="flex flex-col">
-                  <button
-                    onClick={() => handleCategoryClick(category)}
-                    className={cn(
-                      'nav-category-button w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors relative',
-                      isCategoryActive
-                        ? 'nav-category-active text-foreground bg-primary/10 font-medium'
-                        : isCategoryExpanded
-                          ? 'nav-category-expanded bg-accent'
-                          : 'hover:bg-accent/50',
-                    )}
-                  >
-                    {/* 选中态：左侧竖条 */}
-                    {isCategoryActive && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
-                      />
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <CategoryIcon name={category.iconName} className="w-4 h-4" fallback={Globe} />
-                      <span>{category.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {typeof count === 'number' && (
-                        <span className="text-xs text-muted-foreground">{count}</span>
-                      )}
-                      <ChevronDown
+                  return (
+                    <li key={category.id}>
+                      <button
+                        onClick={() => handleCategoryClick(category)}
+                        title={category.name}
                         className={cn(
-                          'w-4 h-4 transition-transform',
-                          expandedCategoryId === category.id ? 'rotate-180' : '',
+                          'w-full flex items-center justify-center p-3 rounded-lg transition-colors relative',
+                          isCategoryActive
+                            ? 'bg-primary/10 text-foreground'
+                            : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                         )}
-                      />
-                    </div>
-                  </button>
-                  {isCategoryExpanded && (
-                    <ul className="mt-1 ml-4 space-y-1">
-                      {category.subCategories.map((subCategory) => (
-                        <li key={subCategory.id}>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSubCategoryClick(category, subCategory);
-                            }}
-                            className={cn(
-                              'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm relative',
-                              activeSubCategoryId ===
-                                subCategoryAnchorId(category.id, subCategory.id)
-                                ? 'nav-subcategory-active text-foreground bg-primary/10 font-medium'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-accent',
-                            )}
-                          >
-                            {activeSubCategoryId === subCategoryAnchorId(category.id, subCategory.id) && (
-                              <span
-                                aria-hidden="true"
-                                className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
-                              />
-                            )}
-                            {subCategory.name}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                      >
+                        {isCategoryActive && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                          />
+                        )}
+                        <CategoryIcon name={category.iconName} className="w-5 h-5" fallback={Globe} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          ) : (
+            /* 展开侧栏 */
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-2">
+                  <Rocket className="w-5 h-5 text-foreground" />
+                  <span className="font-semibold">{config.SITE_TITLE}</span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+                <div className="flex items-center space-x-1">
+                  {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
+                  <button
+                    onClick={handleFoldToggle}
+                    className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+                    title="折叠侧栏"
+                    aria-label="折叠侧栏"
+                  >
+                    <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+              {onOpenSearch && (
+                <button
+                  onClick={onOpenSearch}
+                  className="w-full mb-4 flex items-center gap-2 px-3 py-2 rounded-lg border border-border/50 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Search className="w-4 h-4 shrink-0" />
+                  <span className="flex-1 text-left">搜索</span>
+                  <kbd className="text-xs text-muted-foreground/70">⌘K</kbd>
+                </button>
+              )}
+              <ul className="space-y-1 pb-24">
+                {categories.map((category) => {
+                  const activeCategory = activeSubCategoryId || '';
+                  const isCategoryActive =
+                    selectedCategoryId === category.id ||
+                    (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
+                  const isCategoryExpanded = expandedCategoryId === category.id;
+                  const count = categoryLinkCounts[category.id];
+
+                  return (
+                    <li key={category.id}>
+                      <div className="flex flex-col">
+                        <button
+                          onClick={() => handleCategoryClick(category)}
+                          className={cn(
+                            'nav-category-button w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors relative',
+                            isCategoryActive
+                              ? 'nav-category-active text-foreground bg-primary/10 font-medium'
+                              : isCategoryExpanded
+                                ? 'nav-category-expanded bg-accent'
+                                : 'hover:bg-accent/50',
+                          )}
+                        >
+                          {isCategoryActive && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                            />
+                          )}
+                          <div className="flex items-center space-x-2">
+                            <CategoryIcon
+                              name={category.iconName}
+                              className="w-4 h-4"
+                              fallback={Globe}
+                            />
+                            <span>{category.name}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {typeof count === 'number' && (
+                              <span className="text-xs text-muted-foreground">{count}</span>
+                            )}
+                            <ChevronDown
+                              className={cn(
+                                'w-4 h-4 transition-transform',
+                                expandedCategoryId === category.id ? 'rotate-180' : '',
+                              )}
+                            />
+                          </div>
+                        </button>
+                        {isCategoryExpanded && (
+                          <ul className="mt-1 ml-4 space-y-1">
+                            {category.subCategories.map((subCategory) => (
+                              <li key={subCategory.id}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSubCategoryClick(category, subCategory);
+                                  }}
+                                  className={cn(
+                                    'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm relative',
+                                    activeSubCategoryId ===
+                                      subCategoryAnchorId(category.id, subCategory.id)
+                                      ? 'nav-subcategory-active text-foreground bg-primary/10 font-medium'
+                                      : 'text-muted-foreground hover:text-foreground hover:bg-accent',
+                                  )}
+                                >
+                                  {activeSubCategoryId ===
+                                    subCategoryAnchorId(category.id, subCategory.id) && (
+                                    <span
+                                      aria-hidden="true"
+                                      className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                                    />
+                                  )}
+                                  {subCategory.name}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </nav>
+      )}
+
+      {/* 侧栏隐藏后，顶栏悬浮一个召回按钮 */}
+      {isHidden && (
+        <button
+          onClick={handleFoldToggle}
+          className="hidden lg:flex fixed left-3 top-3 z-30 p-2.5 rounded-lg glass-surface hover:bg-accent transition-colors"
+          title="展开侧栏"
+          aria-label="展开侧栏"
+        >
+          <PanelLeft className="w-5 h-5 text-muted-foreground" />
+        </button>
+      )}
     </>
   );
 });

@@ -6,6 +6,7 @@ import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import SearchPalette from '@/components/search/SearchPalette';
 import { subCategoryAnchorId } from '@/lib/category';
+import { cn } from '@/lib/utils';
 import React from 'react';
 import { Category, Link, WebsiteConfig } from '@/types';
 
@@ -17,12 +18,38 @@ interface MainContentProps {
   config: WebsiteConfig;
 }
 
+/** 侧栏折叠三态：展开 / 窄图标栏 / 隐藏 */
+export type SidebarState = 'expanded' | 'icons' | 'hidden';
+
+const SIDEBAR_STORAGE_KEY = 'nav.sidebar-state';
+
+/** 各态对应的内容区左侧外边距（与 Navigation 侧栏宽度保持一致） */
+const SIDEBAR_MARGIN: Record<SidebarState, string> = {
+  expanded: 'lg:ml-[280px]',
+  icons: 'lg:ml-[64px]',
+  hidden: 'lg:ml-0',
+};
+
+function readSidebarState(): SidebarState {
+  if (typeof window === 'undefined') return 'expanded';
+  const saved = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+  return saved === 'icons' || saved === 'hidden' ? saved : 'expanded';
+}
+
 export default function MainContent({ categories, links, config }: MainContentProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarState, setSidebarState] = useState<SidebarState>(readSidebarState);
   const isClickScrolling = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSidebarStateChange = (state: SidebarState) => {
+    setSidebarState(state);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, state);
+    }
+  };
 
   useEffect(() => {
     // 初始化时，默认选中第一个一级和二级分类
@@ -166,9 +193,16 @@ export default function MainContent({ categories, links, config }: MainContentPr
         onNavChange={handleNavChange}
         onOpenSearch={() => setSearchOpen(true)}
         categoryLinkCounts={categoryLinkCounts}
+        sidebarState={sidebarState}
+        onSidebarStateChange={handleSidebarStateChange}
       />
       <SearchPalette items={searchItems} open={searchOpen} onOpenChange={setSearchOpen} />
-      <main className="ml-0 lg:ml-[280px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">
+      <main
+        className={cn(
+          'ml-0 pt-[56px] lg:pt-4 min-h-screen flex flex-col transition-[margin] duration-200',
+          SIDEBAR_MARGIN[sidebarState],
+        )}
+      >
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 lg:pt-0 pb-24 pt-16">
           {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}
         </div>

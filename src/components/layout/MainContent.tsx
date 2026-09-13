@@ -130,6 +130,17 @@ export default function MainContent({ categories, links, config }: MainContentPr
     [links, selectedCategoryId],
   );
 
+  // 每个一级分类下的链接数，用于侧栏计数 badge
+  const categoryLinkCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const link of links) {
+      if (link.category1Id) {
+        counts[link.category1Id] = (counts[link.category1Id] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [links]);
+
   // 搜索索引：公开面全量条目，附一级分类名帮助定位
   const searchItems = useMemo(() => {
     const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
@@ -154,6 +165,7 @@ export default function MainContent({ categories, links, config }: MainContentPr
         activeSubCategoryId={activeSubCategoryId}
         onNavChange={handleNavChange}
         onOpenSearch={() => setSearchOpen(true)}
+        categoryLinkCounts={categoryLinkCounts}
       />
       <SearchPalette items={searchItems} open={searchOpen} onOpenChange={setSearchOpen} />
       <main className="ml-0 lg:ml-[280px] pt-[56px] lg:pt-4 min-h-screen flex flex-col">

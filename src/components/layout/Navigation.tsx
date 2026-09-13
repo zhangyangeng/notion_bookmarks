@@ -15,6 +15,8 @@ interface NavigationProps {
   activeSubCategoryId: string | null;
   onNavChange: (categoryId: string, subCategoryId?: string | null) => void;
   onOpenSearch?: () => void;
+  /** 每个一级分类下的链接数，用于侧栏计数 badge */
+  categoryLinkCounts?: Record<string, number>;
 }
 
 const defaultConfig: WebsiteConfig = {
@@ -32,6 +34,7 @@ const Navigation = memo(function Navigation({
   activeSubCategoryId,
   onNavChange,
   onOpenSearch,
+  categoryLinkCounts = {},
 }: NavigationProps) {
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
 
@@ -96,7 +99,7 @@ const Navigation = memo(function Navigation({
   return (
     <>
       {/* 移动端顶部导航 */}
-      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 bg-background border-b">
+      <nav className="lg:hidden fixed top-0 left-0 right-0 z-20 border-b glass-surface">
         <div className="flex items-center justify-between px-4 h-16">
           <div className="flex items-center space-x-2">
             <Rocket className="w-5 h-5 text-foreground" />
@@ -104,7 +107,7 @@ const Navigation = memo(function Navigation({
           </div>
           {config.SHOW_THEME_SWITCHER !== 'false' && <ThemeSwitcher />}
         </div>
-        <div className="overflow-x-auto flex items-center h-12 border-t scrollbar-none">
+        <div className="overflow-x-auto flex items-center h-12 border-t border-border/50 scrollbar-none">
           <div className="flex px-4 min-w-full">
             <div className="flex space-x-2 mx-auto">
               {categories.map((category) => {
@@ -120,7 +123,7 @@ const Navigation = memo(function Navigation({
                     className={cn(
                       'mobile-nav-category-button whitespace-nowrap px-3 py-1.5 text-sm rounded-full transition-colors shrink-0',
                       isMobileCategoryActive
-                        ? 'mobile-nav-category-active bg-primary text-primary-foreground font-medium'
+                        ? 'mobile-nav-category-active bg-primary/10 text-foreground font-medium'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent',
                     )}
                   >
@@ -134,7 +137,7 @@ const Navigation = memo(function Navigation({
       </nav>
 
       {/* 桌面端固定侧边导航 */}
-      <nav className="hidden lg:block fixed left-0 top-0 w-[280px] h-screen p-4 overflow-y-auto border-r bg-background z-20">
+      <nav className="hidden lg:block fixed left-0 top-0 w-[280px] h-screen p-4 overflow-y-auto border-r border-border/50 glass-surface z-20">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2">
             <Rocket className="w-5 h-5 text-foreground" />
@@ -159,6 +162,7 @@ const Navigation = memo(function Navigation({
               selectedCategoryId === category.id ||
               (selectedCategoryId && activeCategory.startsWith(`${category.id}-`));
             const isCategoryExpanded = expandedCategoryId === category.id;
+            const count = categoryLinkCounts[category.id];
 
             return (
               <li key={category.id}>
@@ -166,24 +170,36 @@ const Navigation = memo(function Navigation({
                   <button
                     onClick={() => handleCategoryClick(category)}
                     className={cn(
-                      'nav-category-button w-full flex items-center justify-between px-4 py-2 rounded-lg transition-colors',
+                      'nav-category-button w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors relative',
                       isCategoryActive
-                        ? 'nav-category-active bg-primary text-primary-foreground font-medium'
+                        ? 'nav-category-active text-foreground bg-primary/10 font-medium'
                         : isCategoryExpanded
                           ? 'nav-category-expanded bg-accent'
                           : 'hover:bg-accent/50',
                     )}
                   >
+                    {/* 选中态：左侧竖条 */}
+                    {isCategoryActive && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                      />
+                    )}
                     <div className="flex items-center space-x-2">
                       <CategoryIcon name={category.iconName} className="w-4 h-4" fallback={Globe} />
                       <span>{category.name}</span>
                     </div>
-                    <ChevronDown
-                      className={cn(
-                        'w-4 h-4 transition-transform',
-                        expandedCategoryId === category.id ? 'rotate-180' : '',
+                    <div className="flex items-center space-x-2">
+                      {typeof count === 'number' && (
+                        <span className="text-xs text-muted-foreground">{count}</span>
                       )}
-                    />
+                      <ChevronDown
+                        className={cn(
+                          'w-4 h-4 transition-transform',
+                          expandedCategoryId === category.id ? 'rotate-180' : '',
+                        )}
+                      />
+                    </div>
                   </button>
                   {isCategoryExpanded && (
                     <ul className="mt-1 ml-4 space-y-1">
@@ -195,13 +211,19 @@ const Navigation = memo(function Navigation({
                               handleSubCategoryClick(category, subCategory);
                             }}
                             className={cn(
-                              'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm',
+                              'nav-subcategory-button w-full text-left px-4 py-2 rounded-lg transition-colors text-sm relative',
                               activeSubCategoryId ===
                                 subCategoryAnchorId(category.id, subCategory.id)
-                                ? 'nav-subcategory-active bg-primary text-primary-foreground font-medium'
+                                ? 'nav-subcategory-active text-foreground bg-primary/10 font-medium'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-accent',
                             )}
                           >
+                            {activeSubCategoryId === subCategoryAnchorId(category.id, subCategory.id) && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
+                              />
+                            )}
                             {subCategory.name}
                           </button>
                         </li>

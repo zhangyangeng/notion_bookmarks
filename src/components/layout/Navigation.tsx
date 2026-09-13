@@ -203,7 +203,11 @@ const Navigation = memo(function Navigation({
                         />
                       )}
                       <span className="flex items-center space-x-2">
-                        <CategoryIcon name={category.iconName} className="w-4 h-4" fallback={Globe} />
+                        <CategoryIcon
+                          name={category.iconName}
+                          className="w-4 h-4"
+                          fallback={Globe}
+                        />
                         <span>{category.name}</span>
                       </span>
                       {typeof count === 'number' && (
@@ -265,7 +269,11 @@ const Navigation = memo(function Navigation({
                             className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-primary"
                           />
                         )}
-                        <CategoryIcon name={category.iconName} className="w-5 h-5" fallback={Globe} />
+                        <CategoryIcon
+                          name={category.iconName}
+                          className="w-5 h-5"
+                          fallback={Globe}
+                        />
                       </button>
                     </li>
                   );

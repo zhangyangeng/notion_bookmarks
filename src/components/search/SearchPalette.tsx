@@ -92,7 +92,7 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="w-full max-w-xl mx-4 rounded-xl border border-border bg-card shadow-2xl overflow-hidden"
+        className="w-full max-w-xl mx-4 rounded-lg glass-surface overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 px-4 border-b border-border">

@@ -18,26 +18,26 @@
     --radius-lg: 1rem;
     --transition-all: all 0.2s ease-out;
 
-    --background: #f5f4ee;
-    --foreground: #2a312c;
-    --card: #fbfaf5;
-    --card-foreground: #2a312c;
-    --popover: #fbfaf5;
-    --popover-foreground: #2a312c;
-    --primary: #3f5c4a;
-    --primary-foreground: #f5f4ee;
-    --secondary: #ebeae2;
-    --secondary-foreground: #2a312c;
-    --muted: #ebeae2;
-    --muted-foreground: #636a63;
-    --accent: #ebeae2;
-    --accent-foreground: #2a312c;
-    --destructive: hsl(0 60% 50%);
-    --destructive-foreground: #f5f4ee;
-    --border: rgba(40, 60, 45, 0.1);
-    --input: rgba(40, 60, 45, 0.1);
-    --ring: #3f5c4a;
-    --highlight-bg: rgba(63, 92, 74, 0.08);
+    --background: 245 244 238;
+    --foreground: 42 49 44;
+    --card: 251 250 245;
+    --card-foreground: 42 49 44;
+    --popover: 251 250 245;
+    --popover-foreground: 42 49 44;
+    --primary: 63 92 74;
+    --primary-foreground: 245 244 238;
+    --secondary: 235 234 226;
+    --secondary-foreground: 42 49 44;
+    --muted: 235 234 226;
+    --muted-foreground: 99 106 99;
+    --accent: 235 234 226;
+    --accent-foreground: 42 49 44;
+    --destructive: 191 64 64;
+    --destructive-foreground: 245 244 238;
+    --border: 40 60 45;
+    --input: 40 60 45;
+    --ring: 63 92 74;
+    --highlight-bg: 63 92 74;
 
     /* 玻璃面：用于侧栏 / 搜索面板 / 命令面板 / 详情浮层 */
     --glass-bg: rgba(251, 250, 245, 0.5);
@@ -46,26 +46,26 @@
   }
 
   .dark {
-    --background: #1d211f;
-    --foreground: #e7ebe6;
-    --card: #242924;
-    --card-foreground: #e7ebe6;
-    --popover: #242924;
-    --popover-foreground: #e7ebe6;
-    --primary: #93b89b;
-    --primary-foreground: #1d211f;
-    --secondary: #2b312c;
-    --secondary-foreground: #e7ebe6;
-    --muted: #2b312c;
-    --muted-foreground: #a9b2ab;
-    --accent: #2b312c;
-    --accent-foreground: #e7ebe6;
-    --destructive: hsl(0 50% 45%);
-    --destructive-foreground: #e7ebe6;
-    --border: rgba(255, 255, 255, 0.1);
-    --input: rgba(255, 255, 255, 0.1);
-    --ring: #93b89b;
-    --highlight-bg: rgba(147, 184, 155, 0.12);
+    --background: 29 33 31;
+    --foreground: 231 235 230;
+    --card: 36 41 36;
+    --card-foreground: 231 235 230;
+    --popover: 36 41 36;
+    --popover-foreground: 231 235 230;
+    --primary: 147 184 155;
+    --primary-foreground: 29 33 31;
+    --secondary: 43 49 44;
+    --secondary-foreground: 231 235 230;
+    --muted: 43 49 44;
+    --muted-foreground: 169 178 171;
+    --accent: 43 49 44;
+    --accent-foreground: 231 235 230;
+    --destructive: 179 72 72;
+    --destructive-foreground: 231 235 230;
+    --border: 255 255 255;
+    --input: 255 255 255;
+    --ring: 147 184 155;
+    --highlight-bg: 147 184 155;
 
     --glass-bg: rgba(36, 41, 36, 0.55);
     --glass-border: rgba(255, 255, 255, 0.12);
@@ -75,7 +75,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border/10;
   }
   body {
     @apply text-foreground;
@@ -85,7 +85,7 @@
      * 这样玻璃面的 rgba 半透明背景能直接透出光斑。
      * radial-gradient 用 fixed 附着，不参与滚动合成，几乎零性能损耗。
      */
-    background-color: var(--background);
+    background-color: rgb(var(--background));
     background-image:
       radial-gradient(46% 46% at 8% 10%, rgba(95, 130, 95, 0.18), transparent 70%),
       radial-gradient(40% 40% at 92% 18%, rgba(150, 135, 80, 0.14), transparent 70%),
@@ -114,8 +114,8 @@
  */
 @layer components {
   .link-tag-featured {
-    background-color: color-mix(in srgb, var(--primary) 14%, transparent);
-    color: var(--primary);
+    background-color: color-mix(in srgb, rgb(var(--primary)) 14%, transparent);
+    color: rgb(var(--primary));
   }
 
   /* 玻璃面：液态玻璃的统一配方 */
@@ -133,7 +133,7 @@
     background-color: transparent;
   }
   20% {
-    background-color: var(--highlight-bg);
+    background-color: rgb(var(--highlight-bg) / 0.08);
   }
   100% {
     background-color: transparent;

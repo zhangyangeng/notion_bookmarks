@@ -95,7 +95,7 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
         className="w-full max-w-xl mx-4 rounded-lg glass-surface overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 px-4 border-b border-border">
+        <div className="flex items-center gap-2 px-4 border-b border-border/50">
           <IconSearch className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
             ref={inputRef}
@@ -108,7 +108,7 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
             placeholder="搜索站点名称、描述、标签、点评…"
             className="flex-1 h-12 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
           />
-          <kbd className="hidden sm:inline-flex text-xs text-muted-foreground border border-border rounded px-1.5 py-0.5">
+          <kbd className="hidden sm:inline-flex text-xs text-muted-foreground border border-border/50 rounded px-1.5 py-0.5">
             Esc
           </kbd>
         </div>
@@ -155,7 +155,7 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-border text-xs text-muted-foreground flex items-center justify-between">
+        <div className="px-4 py-2 border-t border-border/50 text-xs text-muted-foreground flex items-center justify-between">
           <span>
             共 {items.length} 条 · 显示前 {results.length} 条
           </span>

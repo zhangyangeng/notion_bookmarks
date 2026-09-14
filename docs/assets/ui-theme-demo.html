@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航站 UI 配色 · 方案对照 Demo</title>
+<style>
+  :root {
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .frame { min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+
+  .glow-layer {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    overflow: hidden;
+  }
+  .glow-layer .blob {
+    position: absolute; border-radius: 50%; filter: blur(60px);
+    opacity: var(--blob-opacity, .5);
+  }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 20px;
+    background: var(--bar-bg);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+  }
+  .topbar .title { font-size: 14px; font-weight: 500; color: var(--fg); }
+  .topbar .hint { font-size: 12px; color: var(--fg-2); }
+  .seg { display: inline-flex; align-items: center; background: var(--muted); border-radius: 10px; padding: 3px; }
+  .seg button {
+    border: none; background: transparent; cursor: pointer;
+    font-family: inherit; font-size: 13px; color: var(--fg-2);
+    padding: 5px 11px; border-radius: 8px; transition: all .2s;
+    white-space: nowrap;
+  }
+  .seg button.on { background: var(--card); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .seg button .tick { color: var(--primary); font-weight: 600; }
+  .seg-label { font-size: 11px; color: var(--fg-3); padding: 0 6px 0 8px; white-space: nowrap; }
+  .seg-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+  .spacer { flex: 1; }
+
+  .content { flex: 1; padding: 24px 20px 60px; position: relative; z-index: 1; }
+  .demo-block { margin-bottom: 30px; }
+  .demo-label { font-size: 12px; color: var(--fg-2); margin-bottom: 10px; }
+
+  .glass-stage {
+    position: relative; border-radius: 20px; padding: 18px;
+    overflow: hidden; min-height: 300px;
+    border: 1px solid var(--border);
+  }
+  .stage-blobs { position: absolute; inset: 0; pointer-events: none; }
+  .stage-blobs .blob { position: absolute; border-radius: 50%; filter: blur(46px); opacity: var(--blob-opacity, .55); }
+  .stage-inner { position: relative; z-index: 1; display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .sidebar-demo {
+    width: 250px; flex-shrink: 0; border-radius: 16px; padding: 14px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: var(--glass-shadow);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 10px; font-size: 13px; color: var(--fg-2);
+    position: relative; cursor: default;
+  }
+  .nav-item .cnt { margin-left: auto; font-size: 11px; color: var(--fg-3); }
+  .nav-item.active { color: var(--fg); background: var(--primary-soft); }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+    width: 3px; border-radius: 2px; background: var(--primary);
+  }
+
+  .glass-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 14px; }
+  .glass {
+    padding: 15px 17px; border-radius: 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: var(--glass-shadow);
+    color: var(--fg); font-size: 13px;
+  }
+  .glass b { font-weight: 500; }
+  .glass .sub { color: var(--fg-2); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow); border-color: var(--primary); }
+  .card .icon {
+    width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px;
+    background: var(--muted); display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 500; color: var(--primary);
+  }
+  .card .body { min-width: 0; flex: 1; }
+  .card .name { font-size: 15px; font-weight: 500; color: var(--fg); margin: 0 0 4px; }
+  .card .desc { font-size: 13px; line-height: 1.6; color: var(--fg-2); margin: 0 0 8px; }
+  .card .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--muted); color: var(--fg-2); }
+  .tag.hot { background: var(--primary-soft); color: var(--primary); }
+
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--card-border);
+    font-size: 12px; color: var(--fg-2);
+  }
+  .swatch i {
+    width: 18px; height: 18px; border-radius: 6px; display: inline-block;
+    border: 1px solid rgba(0,0,0,.08); flex-shrink: 0;
+  }
+  .swatch code { font-size: 11px; color: var(--fg); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .fnote { font-size: 12px; color: var(--fg-3); line-height: 1.8; margin-top: 10px; }
+  .fnote code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--fg-2); }
+  .fnote b { color: var(--fg-2); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+  <div class="glow-layer" id="glowLayer"></div>
+
+  <div class="topbar">
+    <span class="title">导航站 UI 配色 · 方案对照</span>
+    <span class="hint">七套配色 / 明暗 / 光斑开关</span>
+    <div class="spacer"></div>
+    <div class="seg" id="themeSeg">
+      <span class="seg-label">初版三选</span>
+      <button data-theme="amber">琥珀·靛</button>
+      <button data-theme="sage" title="初版三选中选定；后细化为「旧墨水绿」">墨绿·米白</button>
+      <button data-theme="slate">灰·淡蓝</button>
+      <span class="seg-sep"></span>
+      <span class="seg-label">墨绿细化</span>
+      <button data-theme="ink" class="on">旧墨水绿 <span class="tick">✓</span></button>
+      <button data-theme="herb">植物标本绿</button>
+      <button data-theme="moss">苔灰绿</button>
+      <button data-theme="bronze">青铜绿</button>
+    </div>
+    <div class="seg" id="modeSeg">
+      <button data-mode="light" class="on">浅色</button>
+      <button data-mode="dark">深色</button>
+    </div>
+    <div class="seg" id="glowSeg">
+      <button data-glow="on" class="on">光斑开</button>
+      <button data-glow="off">光斑关</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="demo-block">
+      <div class="demo-label">当前配色的关键令牌（对照 <code>src/app/globals.css</code>）</div>
+      <div class="swatches" id="swatches"></div>
+    </div>
+
+    <div class="demo-block">
+      <div class="demo-label">玻璃面 —— 光斑铺在玻璃正下方，这里才看得出「透」</div>
+      <div class="glass-stage" id="glassStage">
+        <div class="stage-blobs" id="stageBlobs"></div>
+        <div class="stage-inner">
+          <div class="sidebar-demo">
+            <div class="nav-item active"><span>AI 工具</span><span class="cnt">66</span></div>
+            <div class="nav-item"><span>开发资源</span><span class="cnt">50</span></div>
+            <div class="nav-item"><span>设计资源</span><span class="cnt">39</span></div>
+            <div class="nav-item"><span>系统工具</span><span class="cnt">21</span></div>
+            <div class="nav-item"><span>图床 · 镜像</span><span class="cnt">12</span></div>
+          </div>
+          <div class="glass-col">
+            <div class="glass">
+              <b>搜索（Cmd+K）</b><br>
+              <span class="sub">搜索站点名称、描述、标签、点评…</span>
+            </div>
+            <div class="glass">
+              <b>详情浮层</b><br>
+              <span class="sub">展开点评 / 备注 / 描述</span>
+            </div>
+            <div class="glass">
+              <b>底部条 · 回到顶部</b><br>
+              <span class="sub">玻璃条让位版权，按钮贴右下</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fnote">切换「光斑关」：玻璃面退成接近纯色的平板 —— 这就是<a>玻璃必须压在非平背景上</a>的原因。</p>
+    </div>
+
+    <div class="demo-block">
+      <div class="demo-label">卡片网格（普通底，不用重玻璃，靠阴影分层）</div>
+      <div class="grid">
+        <div class="card"><div class="icon">MS</div><div class="body"><p class="name">MSDN 我告诉你</p><p class="desc">纯净 Windows 系统镜像下载站，集成原版 ISO 与 Office，装机党必备。</p><div class="tags"><span class="tag hot">推荐</span><span class="tag">Windows</span></div></div></div>
+        <div class="card"><div class="icon">PI</div><div class="body"><p class="name">PixPin</p><p class="desc">截图 + 贴图 + OCR + 录屏一体，替代 Snipaste 的国产桌面效率工具。</p><div class="tags"><span class="tag">截图</span><span class="tag">效率</span></div></div></div>
+        <div class="card"><div class="icon">GH</div><div class="body"><p class="name">GitHub</p><p class="desc">全球最大的代码托管平台，开源项目与协作开发的事实标准。</p><div class="tags"><span class="tag">开发</span><span class="tag">开源</span></div></div></div>
+        <div class="card"><div class="icon">EV</div><div class="body"><p class="name">Everything</p><p class="desc">秒级全盘文件搜索，Windows 上无可替代的本地检索神器。</p><div class="tags"><span class="tag">搜索</span><span class="tag">Windows</span></div></div></div>
+        <div class="card"><div class="icon">DV</div><div class="body"><p class="name">DevDocs</p><p class="desc">聚合多语言 API 文档的离线速查站，开发者手边的字典。</p><div class="tags"><span class="tag">文档</span><span class="tag">开发</span></div></div></div>
+        <div class="card"><div class="icon">TB</div><div class="body"><p class="name">临时图床</p><p class="desc">拖拽上传即得外链，临时分享图片用，不保证长期存储。</p><div class="tags"><span class="tag hot">推荐</span><span class="tag">图床</span></div></div></div>
+      </div>
+    </div>
+
+    <div class="demo-block">
+      <div class="demo-label">选型路径</div>
+      <p class="fnote">
+        <b>初版三选</b>给的是三个跨色系方向 —— <code>琥珀·靛</code>（暖赭 + 深靛）、<code>墨绿·米白</code>、<code>灰·淡蓝</code>，用于回答「整站该是什么气质」。<br>
+        选定 <b>墨绿·米白</b> 后，在绿系内出四档微调 —— <code>旧墨水绿</code>、<code>植物标本绿</code>、<code>苔灰绿</code>、<code>青铜绿</code>，用于回答「绿到什么程度」。<br>
+        最终采用 <b>旧墨水绿</b>，落地为 <code>--primary: 63 92 74</code>（深色 <code>147 184 155</code>），即本页默认配色（按钮带 ✓）。
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const frame = document.getElementById('frame');
+  const glowLayer = document.getElementById('glowLayer');
+  const stageBlobs = document.getElementById('stageBlobs');
+  const swatches = document.getElementById('swatches');
+  let theme = 'ink', mode = 'light', glow = 'on';
+
+  const themes = {
+    amber:  { label: '琥珀·靛',    group: '初版三选' },
+    sage:   { label: '墨绿·米白',  group: '初版三选', note: '初版选定' },
+    slate:  { label: '灰·淡蓝',    group: '初版三选' },
+    ink:    { label: '旧墨水绿',   group: '墨绿细化', note: '已采用' },
+    herb:   { label: '植物标本绿', group: '墨绿细化' },
+    moss:   { label: '苔灰绿',     group: '墨绿细化' },
+    bronze: { label: '青铜绿',     group: '墨绿细化' }
+  };
+
+  // blobs：三块光斑，铺在页面与玻璃舞台的底上，玻璃才有东西可透
+  const palettes = {
+    amber: {
+      light: {
+        bg: '#fbf8f2', fg: '#2b2436', 'fg-2': '#6b6376', 'fg-3': '#9a92a6',
+        card: '#fffdf9', 'card-border': 'rgba(60,50,80,.08)', 'card-shadow': '0 10px 28px rgba(120,90,40,.14)',
+        primary: '#a0521f', 'primary-soft': 'rgba(160,82,31,.12)', muted: '#f1ebe0',
+        border: 'rgba(60,50,80,.10)', 'bar-bg': 'rgba(251,248,242,.8)',
+        'glass-bg': 'rgba(255,253,249,.55)', 'glass-border': 'rgba(255,255,255,.6)', 'glass-shadow': '0 8px 24px rgba(120,90,40,.10)',
+        blobs: ['rgba(217,140,60,.32)', 'rgba(120,100,200,.22)']
+      },
+      dark: {
+        bg: '#1c1a2e', fg: '#ece9f2', 'fg-2': '#b0aac0', 'fg-3': '#7a7490',
+        card: '#242135', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#e0a55c', 'primary-soft': 'rgba(224,165,92,.16)', muted: '#2c2940',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(28,26,46,.75)',
+        'glass-bg': 'rgba(36,33,53,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(160,110,50,.30)', 'rgba(90,80,160,.25)']
+      }
+    },
+    sage: {
+      light: {
+        bg: '#f6f5ef', fg: '#2a3329', 'fg-2': '#636b60', 'fg-3': '#959d91',
+        card: '#fdfcf8', 'card-border': 'rgba(40,60,40,.08)', 'card-shadow': '0 10px 28px rgba(70,90,60,.14)',
+        primary: '#3f6b4f', 'primary-soft': 'rgba(63,107,79,.12)', muted: '#eaeae1',
+        border: 'rgba(40,60,40,.10)', 'bar-bg': 'rgba(246,245,239,.8)',
+        'glass-bg': 'rgba(253,252,248,.55)', 'glass-border': 'rgba(255,255,255,.6)', 'glass-shadow': '0 8px 24px rgba(70,90,60,.10)',
+        blobs: ['rgba(90,130,90,.30)', 'rgba(190,170,110,.20)']
+      },
+      dark: {
+        bg: '#1c241e', fg: '#e8ede6', 'fg-2': '#aab4a8', 'fg-3': '#767f74',
+        card: '#232c25', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#8fbfa0', 'primary-soft': 'rgba(143,191,160,.16)', muted: '#2b352d',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(28,36,30,.75)',
+        'glass-bg': 'rgba(35,44,37,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(70,120,80,.28)', 'rgba(150,130,70,.20)']
+      }
+    },
+    slate: {
+      light: {
+        bg: '#f7f8fa', fg: '#2a3240', 'fg-2': '#5d6670', 'fg-3': '#96a0ad',
+        card: '#ffffff', 'card-border': 'rgba(40,60,90,.08)', 'card-shadow': '0 10px 28px rgba(40,60,90,.12)',
+        primary: '#3a6ea5', 'primary-soft': 'rgba(58,110,165,.12)', muted: '#edf0f4',
+        border: 'rgba(40,60,90,.10)', 'bar-bg': 'rgba(247,248,250,.8)',
+        'glass-bg': 'rgba(255,255,255,.55)', 'glass-border': 'rgba(255,255,255,.6)', 'glass-shadow': '0 8px 24px rgba(40,60,90,.10)',
+        blobs: ['rgba(90,140,200,.26)', 'rgba(150,160,180,.20)']
+      },
+      dark: {
+        bg: '#1c2128', fg: '#e6e9ee', 'fg-2': '#a8b1bd', 'fg-3': '#74808d',
+        card: '#242a33', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#7fb3e8', 'primary-soft': 'rgba(127,179,232,.16)', muted: '#2b333d',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(28,33,40,.75)',
+        'glass-bg': 'rgba(36,42,51,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(70,120,180,.26)', 'rgba(110,120,140,.18)']
+      }
+    },
+    ink: {
+      light: {
+        bg: '#f5f4ee', fg: '#2a312c', 'fg-2': '#636a63', 'fg-3': '#969d95',
+        card: '#fbfaf5', 'card-border': 'rgba(40,60,45,.08)', 'card-shadow': '0 10px 28px rgba(60,80,60,.14)',
+        primary: '#3f5c4a', 'primary-soft': 'rgba(63,92,74,.13)', muted: '#ebeae2',
+        border: 'rgba(40,60,45,.10)', 'bar-bg': 'rgba(245,244,238,.8)',
+        'glass-bg': 'rgba(251,250,245,.5)', 'glass-border': 'rgba(255,255,255,.55)', 'glass-shadow': '0 8px 24px rgba(60,80,60,.10)',
+        blobs: ['rgba(95,130,95,.40)', 'rgba(150,135,80,.28)', 'rgba(70,110,120,.30)']
+      },
+      dark: {
+        bg: '#1d211f', fg: '#e7ebe6', 'fg-2': '#a9b2ab', 'fg-3': '#767f78',
+        card: '#242924', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#93b89b', 'primary-soft': 'rgba(147,184,155,.16)', muted: '#2b312c',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(29,33,31,.75)',
+        'glass-bg': 'rgba(36,41,36,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(80,120,85,.28)', 'rgba(130,115,70,.22)', 'rgba(60,100,110,.24)']
+      }
+    },
+    herb: {
+      light: {
+        bg: '#f4f3eb', fg: '#2b332d', 'fg-2': '#5f685f', 'fg-3': '#939b93',
+        card: '#faf9f2', 'card-border': 'rgba(45,70,50,.08)', 'card-shadow': '0 10px 28px rgba(55,80,55,.14)',
+        primary: '#4a7054', 'primary-soft': 'rgba(74,112,84,.13)', muted: '#e9e8df',
+        border: 'rgba(45,70,50,.10)', 'bar-bg': 'rgba(244,243,235,.8)',
+        'glass-bg': 'rgba(250,249,242,.5)', 'glass-border': 'rgba(255,255,255,.55)', 'glass-shadow': '0 8px 24px rgba(55,80,55,.10)',
+        blobs: ['rgba(110,145,110,.42)', 'rgba(165,150,90,.26)', 'rgba(85,125,130,.30)']
+      },
+      dark: {
+        bg: '#1d221f', fg: '#e6ece6', 'fg-2': '#a7b2a9', 'fg-3': '#748078',
+        card: '#242a25', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#9bc2a3', 'primary-soft': 'rgba(155,194,163,.16)', muted: '#2b312c',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(29,34,31,.75)',
+        'glass-bg': 'rgba(36,42,37,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(90,135,95,.28)', 'rgba(140,125,75,.22)', 'rgba(70,115,120,.24)']
+      }
+    },
+    moss: {
+      light: {
+        bg: '#f3f3ee', fg: '#2c3230', 'fg-2': '#646b66', 'fg-3': '#969d98',
+        card: '#fafaf5', 'card-border': 'rgba(50,60,50,.08)', 'card-shadow': '0 10px 28px rgba(55,65,55,.13)',
+        primary: '#5a6b5a', 'primary-soft': 'rgba(90,107,90,.13)', muted: '#e9e9e2',
+        border: 'rgba(50,60,50,.10)', 'bar-bg': 'rgba(243,243,238,.8)',
+        'glass-bg': 'rgba(250,250,245,.5)', 'glass-border': 'rgba(255,255,255,.55)', 'glass-shadow': '0 8px 24px rgba(55,65,55,.10)',
+        blobs: ['rgba(120,135,120,.36)', 'rgba(150,145,100,.24)', 'rgba(95,120,125,.28)']
+      },
+      dark: {
+        bg: '#1f2220', fg: '#e8ebe7', 'fg-2': '#aab1ab', 'fg-3': '#777f78',
+        card: '#262a26', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#a3b5a3', 'primary-soft': 'rgba(163,181,163,.16)', muted: '#2c302c',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(31,34,32,.75)',
+        'glass-bg': 'rgba(38,42,38,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(105,125,105,.26)', 'rgba(130,125,85,.20)', 'rgba(80,110,115,.22)']
+      }
+    },
+    bronze: {
+      light: {
+        bg: '#f4f3ec', fg: '#2e322b', 'fg-2': '#64685f', 'fg-3': '#969b92',
+        card: '#faf9f2', 'card-border': 'rgba(60,65,45,.08)', 'card-shadow': '0 10px 28px rgba(75,80,55,.14)',
+        primary: '#5f6b4a', 'primary-soft': 'rgba(95,107,74,.13)', muted: '#eae9e0',
+        border: 'rgba(60,65,45,.10)', 'bar-bg': 'rgba(244,243,236,.8)',
+        'glass-bg': 'rgba(250,249,242,.5)', 'glass-border': 'rgba(255,255,255,.55)', 'glass-shadow': '0 8px 24px rgba(75,80,55,.10)',
+        blobs: ['rgba(135,150,95,.38)', 'rgba(175,140,75,.30)', 'rgba(110,130,115,.26)']
+      },
+      dark: {
+        bg: '#20211d', fg: '#e9ebe4', 'fg-2': '#adb1a6', 'fg-3': '#787c72',
+        card: '#272a24', 'card-border': 'rgba(255,255,255,.08)', 'card-shadow': '0 10px 28px rgba(0,0,0,.4)',
+        primary: '#b4bd95', 'primary-soft': 'rgba(180,189,149,.16)', muted: '#2d3029',
+        border: 'rgba(255,255,255,.10)', 'bar-bg': 'rgba(32,33,29,.75)',
+        'glass-bg': 'rgba(39,42,36,.55)', 'glass-border': 'rgba(255,255,255,.12)', 'glass-shadow': '0 8px 24px rgba(0,0,0,.4)',
+        blobs: ['rgba(120,135,85,.26)', 'rgba(155,125,70,.22)', 'rgba(95,115,100,.22)']
+      }
+    }
+  };
+
+  const blobPositions = [
+    { left: '5%', top: '8%', w: '46%', h: '46%' },
+    { left: '55%', top: '12%', w: '40%', h: '40%' },
+    { left: '20%', top: '58%', w: '50%', h: '50%' }
+  ];
+
+  function renderBlobs(container, blobs) {
+    container.innerHTML = '';
+    blobs.forEach((color, i) => {
+      const b = document.createElement('div');
+      b.className = 'blob';
+      const pos = blobPositions[i % blobPositions.length];
+      b.style.left = pos.left; b.style.top = pos.top;
+      b.style.width = pos.w; b.style.height = pos.h;
+      b.style.background = color;
+      container.appendChild(b);
+    });
+  }
+
+  function renderSwatches(p) {
+    const items = [
+      ['--primary', p.primary],
+      ['--background', p.bg],
+      ['--card', p.card],
+      ['--foreground', p.fg]
+    ];
+    swatches.innerHTML = items.map(([k, v]) =>
+      `<span class="swatch"><i style="background:${v}"></i>${k} <code>${v}</code></span>`
+    ).join('');
+  }
+
+  function apply() {
+    const p = palettes[theme][mode];
+    const s = frame.style;
+    s.setProperty('--fg', p.fg); s.setProperty('--fg-2', p['fg-2']); s.setProperty('--fg-3', p['fg-3']);
+    s.setProperty('--card', p.card); s.setProperty('--card-border', p['card-border']); s.setProperty('--card-shadow', p['card-shadow']);
+    s.setProperty('--primary', p.primary); s.setProperty('--primary-soft', p['primary-soft']); s.setProperty('--muted', p.muted);
+    s.setProperty('--border', p.border); s.setProperty('--bar-bg', p['bar-bg']);
+    s.setProperty('--glass-bg', p['glass-bg']); s.setProperty('--glass-border', p['glass-border']); s.setProperty('--glass-shadow', p['glass-shadow']);
+
+    frame.style.background = p.bg;
+    frame.style.setProperty('--blob-opacity', glow === 'on' ? '.55' : '0');
+
+    if (glow === 'on') {
+      renderBlobs(glowLayer, p.blobs);
+      renderBlobs(stageBlobs, p.blobs);
+      glowLayer.style.display = 'block';
+      stageBlobs.style.display = 'block';
+    } else {
+      glowLayer.style.display = 'none';
+      stageBlobs.style.display = 'none';
+    }
+
+    renderSwatches(p);
+  }
+
+  document.getElementById('themeSeg').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    theme = btn.dataset.theme;
+    document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b === btn));
+    apply();
+  });
+  document.getElementById('modeSeg').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    mode = e.target.dataset.mode;
+    document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b === e.target));
+    apply();
+  });
+  document.getElementById('glowSeg').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    glow = e.target.dataset.glow;
+    document.querySelectorAll('#glowSeg button').forEach(b => b.classList.toggle('on', b === e.target));
+    apply();
+  });
+
+  apply();
+</script>
+</body>
+</html>

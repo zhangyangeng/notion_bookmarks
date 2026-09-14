@@ -4,11 +4,17 @@ import type { Collection, Link } from '../types';
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { searchItems } = require('./search.ts') as {
+const { searchItems, readInitialQuery, planQuerySync } = require('./search.ts') as {
   searchItems: (
     items: import('./search').SearchItem[],
     query: string,
   ) => import('./search').SearchItem[];
+  readInitialQuery: (href: string) => string;
+  planQuerySync: (options: {
+    open: boolean;
+    query: string;
+    justClosed: boolean;
+  }) => import('./search').QuerySync;
 };
 const { assertUniqueSlugs, resolveCollections, resolveCollectionBySlug } =
   require('./collection.ts') as {
@@ -81,6 +87,42 @@ test('搜索空格分词做 AND 匹配', () => {
   const items = [item({})];
   assert.equal(searchItems(items, 'snip 截图').length, 1, '两个 token 都命中');
   assert.equal(searchItems(items, 'snip 不存在').length, 0, '任一 token 不中则排除');
+});
+
+test('从地址栏解析初始查询词', () => {
+  const base = 'https://nav.wrysmile.cn/';
+  assert.equal(readInitialQuery(`${base}?q=${encodeURIComponent('图床')}`), '图床', '读取 q');
+  assert.equal(
+    readInitialQuery(`${base}?q=%E5%9B%BE%E5%BA%8A+%E5%85%8D%E8%B4%B9`),
+    '图床 免费',
+    '百分号编码与 + 号都还原',
+  );
+  assert.equal(readInitialQuery(`${base}?q=%20%20`), '', '纯空白视为无查询');
+  assert.equal(readInitialQuery(`${base}?other=1`), '', '无 q 返回空串');
+  assert.equal(readInitialQuery(''), '', 'href 为空时不抛错');
+});
+
+test('地址栏 q 的同步时机：关闭才清，首帧不动', () => {
+  assert.equal(
+    planQuerySync({ open: true, query: '图床', justClosed: false }),
+    'set',
+    '打开且有词时写入',
+  );
+  assert.equal(
+    planQuerySync({ open: true, query: '', justClosed: false }),
+    'none',
+    '打开但尚未输入时不碰地址栏，保留分享链接带来的 q',
+  );
+  assert.equal(
+    planQuerySync({ open: false, query: '', justClosed: true }),
+    'delete',
+    '关闭面板时清掉，避免被收藏或在刷新时误触发面板',
+  );
+  assert.equal(
+    planQuerySync({ open: false, query: '', justClosed: false }),
+    'none',
+    '首帧本就是关闭态，不能清掉别人分享链接里的 q',
+  );
 });
 
 test('slug 重复时抛错并报出冲突的两个合集', () => {

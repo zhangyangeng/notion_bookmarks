@@ -1,14 +1,26 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { SearchItem, searchItems } from '@/lib/search';
+import React, {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { SearchItem, searchItems, readInitialQuery, planQuerySync } from '@/lib/search';
 import { IconSearch, IconExternalLink } from '@tabler/icons-react';
 
 interface SearchPaletteProps {
   items: SearchItem[];
   /** 受控：由父组件决定面板开合（Cmd+K 快捷键与导航按钮共用同一开关） */
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  /**
+   * 接收 setState 而非普通回调 —— Cmd+K 是开关，要按「最新值」取反。
+   * 若读闭包里的 `open`，在收起面板的同一次事件循环里再按 Cmd+K 会读到旧值，开关失灵。
+   */
+  onOpenChange: Dispatch<SetStateAction<boolean>>;
 }
 
 const MAX_RESULTS = 20;
@@ -22,37 +34,61 @@ export default function SearchPalette({ items, open, onOpenChange }: SearchPalet
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  /** 地址栏带来的初始查询词，等面板真正打开时再消费（见下方两个 effect 的分工） */
+  const pendingQuery = useRef<string | null>(null);
+  /** 上一轮的面板开合状态 —— 用来识别「关闭」这个动作本身，而非「当前是关闭态」 */
+  const prevOpen = useRef(false);
 
   const results = useMemo(() => searchItems(items, query).slice(0, MAX_RESULTS), [items, query]);
+
+  // 地址栏带 `?q=` 时自动展开面板，让别人发来的搜索结果链接能直接打开。
+  // 读 location 只能放在客户端 effect：首帧读会与服务端输出不一致，触发 hydration 报错。
+  // 此处不直接 setQuery —— 面板尚未打开，马上会被「打开时」的 effect 覆盖，故先暂存。
+  useEffect(() => {
+    const initial = readInitialQuery(window.location.href);
+    if (!initial) return;
+    pendingQuery.current = initial;
+    onOpenChange(true);
+  }, [onOpenChange]);
 
   // Cmd/Ctrl+K 唤起 / Esc 关闭
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        onOpenChange(!open);
+        onOpenChange((prev) => !prev);
       } else if (e.key === 'Escape') {
         onOpenChange(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, onOpenChange]);
+  }, [onOpenChange]);
 
-  // 打开时聚焦输入框、复位选中项
+  // 打开时查询词取自地址栏暂存值（若有），消费一次即弃；关闭时一并清空。
+  // 关闭也要清：否则重开面板那一帧会带着上次的查询词同步进地址栏，
+  // 而下一帧查询词才被改写，那一下已经来不及把地址栏改回来了 —— 结果是地址栏留着词、输入框却是空的。
   useEffect(() => {
     if (open) {
-      setQuery('');
+      setQuery(pendingQuery.current ?? '');
+      pendingQuery.current = null;
       setActiveIndex(0);
       requestAnimationFrame(() => inputRef.current?.focus());
+    } else {
+      setQuery('');
     }
   }, [open]);
 
-  // `?q=` 同步到 URL，结果可分享
+  // `?q=` 同步到 URL，结果可分享；关闭面板时一并清掉（判定依据见 lib/search 的 planQuerySync）。
   useEffect(() => {
-    if (!open) return;
+    const justClosed = prevOpen.current && !open;
+    prevOpen.current = open;
+
+    const action = planQuerySync({ open, query, justClosed });
+    if (action === 'none') return;
+
     const url = new URL(window.location.href);
-    if (query) {
+    if (action === 'set') {
       url.searchParams.set('q', query);
     } else {
       url.searchParams.delete('q');

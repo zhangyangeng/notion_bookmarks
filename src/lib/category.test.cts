@@ -13,6 +13,7 @@ const { buildCategoryTree, resolveLinks, UNCATEGORIZED_ID } = require('./categor
 function category(partial: Pick<Category, 'id' | 'name'> & Partial<Category>): Category {
   return {
     iconName: '',
+    icon: null,
     order: 0,
     enabled: true,
     parentId: null,

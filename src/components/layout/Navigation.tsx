@@ -4,16 +4,7 @@ import React, { useState, useEffect, memo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { subCategoryAnchorId } from '@/lib/category';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import {
-  Rocket,
-  ChevronDown,
-  Globe,
-  Search,
-  PanelLeft,
-  PanelLeftClose,
-  Menu,
-  X,
-} from 'lucide-react';
+import { Rocket, ChevronDown, Search, PanelLeft, PanelLeftClose, Menu, X } from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { Category, SubCategory, WebsiteConfig } from '@/types';
 import { searchShortcut, usePlatform } from '@/lib/platform';
@@ -219,11 +210,7 @@ const Navigation = memo(function Navigation({
                         />
                       )}
                       <span className="flex items-center space-x-2">
-                        <CategoryIcon
-                          name={category.iconName}
-                          className="w-4 h-4"
-                          fallback={Globe}
-                        />
+                        <CategoryIcon icon={category.icon} className="w-4 h-4" />
                         <span>{category.name}</span>
                       </span>
                       {typeof count === 'number' && (
@@ -296,7 +283,7 @@ const Navigation = memo(function Navigation({
                           className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary"
                         />
                       )}
-                      <CategoryIcon name={category.iconName} className="w-5 h-5" fallback={Globe} />
+                      <CategoryIcon icon={category.icon} className="w-5 h-5" />
                     </button>
                   </li>
                 );
@@ -375,11 +362,7 @@ const Navigation = memo(function Navigation({
                           />
                         )}
                         <div className="flex items-center space-x-2">
-                          <CategoryIcon
-                            name={category.iconName}
-                            className="w-4 h-4"
-                            fallback={Globe}
-                          />
+                          <CategoryIcon icon={category.icon} className="w-4 h-4" />
                           <span>{category.name}</span>
                         </div>
                         <div className="flex items-center space-x-2">

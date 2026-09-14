@@ -19,6 +19,7 @@ import {
   isNotionCollectionPage,
   toCollection,
 } from '@/types';
+import { resolveCategoryIcon } from '@/lib/icon-svg';
 
 export const notion = new Client({
   auth: envConfig.NOTION_TOKEN,
@@ -209,7 +210,11 @@ export const getCategories = cache(async (): Promise<Category[]> => {
       ],
     });
 
-    const categories = response.results.filter(isNotionCategoryPage).map(toCategory);
+    const categories = response.results
+      .filter(isNotionCategoryPage)
+      .map(toCategory)
+      // 图标名解析成可渲染形态。在服务端做完，客户端才能完全不认识图标库（见 lib/icon-svg.ts）
+      .map((category) => ({ ...category, icon: resolveCategoryIcon(category.iconName) }));
 
     return categories.sort((a, b) => a.order - b.order);
   } catch (err) {

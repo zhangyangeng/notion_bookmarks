@@ -112,6 +112,8 @@ export function createUncategorizedCategory(): Category {
     id: UNCATEGORIZED_ID,
     name: UNCATEGORIZED_NAME,
     iconName: '',
+    // 虚拟分类没有对应的 Notion 记录，图标交由渲染器兜底
+    icon: null,
     order: Number.MAX_SAFE_INTEGER,
     enabled: true,
     parentId: null,

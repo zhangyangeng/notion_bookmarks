@@ -49,9 +49,9 @@ const LinkContainer = memo(function LinkContainer({ category, links }: LinkConta
   return (
     <section id={category.id} className="space-y-8">
       <div className="section-heading flex items-center gap-3 pb-2 border-b">
-        {category.iconName ? (
+        {category.icon ? (
           <div className="section-heading-icon w-7 h-7 p-1 rounded-lg bg-primary/5 text-primary">
-            <CategoryIcon name={category.iconName} className="w-5 h-5" />
+            <CategoryIcon icon={category.icon} className="w-5 h-5" />
           </div>
         ) : null}
         <h2 className="section-heading-title text-2xl font-bold tracking-tight">{category.name}</h2>

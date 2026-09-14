@@ -44,11 +44,22 @@ export interface SubCategory {
   order: number;
 }
 
+/**
+ * 分类图标解析后的可渲染形态。
+ *
+ * - `svg` ：lucide 图标的 `<svg>` 内部标记，渲染时套外壳后注入
+ * - `text`：emoji / 符号等非 ASCII 文本，作为 React 文本节点渲染
+ */
+export type CategoryIconData = { kind: 'svg'; inner: string } | { kind: 'text'; value: string };
+
 // Domain Model
 export interface Category {
   id: string;
   name: string;
+  /** Notion `IconName` 原始值。保留用于溯源与对账，UI 不直接渲染它 */
   iconName: string;
+  /** 由 iconName 解析所得；null 表示无图标或名字认不出，由 UI 兜底 */
+  icon: CategoryIconData | null;
   order: number;
   enabled: boolean;
   /** 所属一级分类的记录 id；一级分类自身为 null */
@@ -72,6 +83,8 @@ export function toCategory(page: NotionCategoryPage): Category {
     id: page.id,
     name: extractTitle(props.Name),
     iconName: extractRichText(props.IconName),
+    // 解析结果由 lib 层（getCategories）在服务端补入 —— 类型层不依赖渲染库
+    icon: null,
     order: props.Order.number || 0,
     enabled: props.Enabled.checkbox,
     parentId: parentIds[0] ?? null,

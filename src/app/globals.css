@@ -87,19 +87,30 @@
      * 底色 + 彩色光斑直接铺在 body 背景上（而非 -1 层伪元素），
      * 这样玻璃面的 rgba 半透明背景能直接透出光斑。
      * radial-gradient 用 fixed 附着，不参与滚动合成，几乎零性能损耗。
+     *
+     * 三块光斑按「分区布光」而非均匀撒点 —— 每块服务一个区域，主次分明：
+     * 主斑是 38%×84% 的竖长墨绿椭圆，中心落在 17% 46%，横跨侧栏与内容区左半。
+     * 竖长是为贴合侧栏那条全高竖条；用大椭圆的理由是小斑衰减太快 ——
+     * 半径降到 15% 时侧栏右半已归零，透不出绿，反而不如一块跨界的大斑。
+     * 光斑只做整体氛围，不参与语义；参数来源与取舍见
+     * docs/references/03-背景光斑布光.md。
      */
     background-color: rgb(var(--background));
     background-image:
-      radial-gradient(46% 46% at 8% 10%, rgba(95, 130, 95, 0.18), transparent 70%),
-      radial-gradient(40% 40% at 92% 18%, rgba(150, 135, 80, 0.14), transparent 70%),
-      radial-gradient(50% 50% at 30% 85%, rgba(70, 110, 120, 0.14), transparent 70%);
+      radial-gradient(38% 84% at 17% 46%, rgba(95, 130, 95, 0.28), transparent 88%),
+      radial-gradient(44% 46% at 66% 32%, rgba(150, 135, 80, 0.15), transparent 78%),
+      radial-gradient(46% 42% at 46% 90%, rgba(70, 110, 120, 0.13), transparent 74%);
     background-attachment: fixed;
   }
   .dark body {
+    /*
+     * 与浅色同几何、独立配色。深色下背景明度低，光斑要更亮、更透才看得见 ——
+     * 直接沿用浅色的绿会糊成一片脏灰。取值见 docs/references/03-背景光斑布光.md「5.2 暗色参数」。
+     */
     background-image:
-      radial-gradient(46% 46% at 8% 10%, rgba(80, 120, 85, 0.16), transparent 70%),
-      radial-gradient(40% 40% at 92% 18%, rgba(130, 115, 70, 0.12), transparent 70%),
-      radial-gradient(50% 50% at 30% 85%, rgba(60, 100, 110, 0.14), transparent 70%);
+      radial-gradient(38% 84% at 17% 46%, rgba(104, 156, 112, 0.22), transparent 88%),
+      radial-gradient(44% 46% at 66% 32%, rgba(150, 128, 78, 0.13), transparent 78%),
+      radial-gradient(46% 42% at 46% 90%, rgba(78, 120, 132, 0.12), transparent 74%);
     background-attachment: fixed;
   }
 }

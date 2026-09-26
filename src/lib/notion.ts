@@ -27,7 +27,7 @@ export const notion = new Client({
 
 export const revalidate = parseInt(process.env.REVALIDATE_TIME ?? '43200', 10);
 
-// 数据拉取失败标记。三个读取函数在 catch 时置位，供页面判断是否要挂「降级」提示。
+// 数据拉取失败标记。读取函数在请求抛错、或必需配置缺失时置位，供页面判断是否要挂「降级」提示。
 // 用模块级标记而非改返回值，是为了不破坏现有 5 处调用点的返回类型。
 let dataFetchFailed = false;
 
@@ -196,6 +196,8 @@ export const getCategories = cache(async (): Promise<Category[]> => {
   const databaseId = envConfig.NOTION_CATEGORIES_DB_ID;
 
   if (!databaseId) {
+    console.error('未配置 NOTION_CATEGORIES_DB_ID，无法读取分类');
+    dataFetchFailed = true;
     return [];
   }
 
@@ -230,6 +232,10 @@ export const getCollections = cache(async (): Promise<Collection[]> => {
   const databaseId = envConfig.NOTION_COLLECTIONS_DB_ID;
 
   if (!databaseId) {
+    // 漏配环境变量时合集读空，分享页会把「读不到」误判成「不存在」而 404 ——
+    // 配置故障被伪装成内容缺失，页面上完全看不出来。置失败标记，改为降级提示。
+    console.error('未配置 NOTION_COLLECTIONS_DB_ID，无法读取合集');
+    dataFetchFailed = true;
     return [];
   }
 

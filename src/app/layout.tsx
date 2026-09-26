@@ -20,7 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const config = mergeConfig(await getWebsiteConfig());
 
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+    // 未配置站点地址时退回 Vercel 提供的部署域名，避免把 localhost 写进 og:url
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+    ),
     title: {
       default: config.SITE_TITLE || 'Ezho导航',
       template: `%s | ${config.SITE_TITLE || 'Ezho工具箱'}`,
@@ -37,11 +41,15 @@ export async function generateMetadata(): Promise<Metadata> {
       title: config.SITE_TITLE,
       description: config.SITE_DESCRIPTION,
       siteName: config.SITE_TITLE,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: config.SITE_TITLE,
-      description: config.SITE_DESCRIPTION,
+      // 站点级分享图，全站兜底：微信 / QQ / 飞书 / 钉钉等国内平台读的都是 og:image
+      images: [
+        {
+          url: '/og.png',
+          width: 1200,
+          height: 630,
+          alt: config.SITE_TITLE,
+        },
+      ],
     },
     robots: {
       index: true,

@@ -1,4 +1,5 @@
 import { getCollections, getLinks, getWebsiteConfig, hasDataFetchFailed } from '@/lib/notion';
+import { mergeConfig } from '@/config';
 import { assertUniqueSlugs, resolveCollectionBySlug } from '@/lib/collection';
 import ShareCard from '@/components/share/ShareCard';
 import DataUnavailableBanner from '@/components/layout/DataUnavailableBanner';
@@ -22,13 +23,34 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const collections = await getCollections();
+  const [collections, websiteConfig] = await Promise.all([getCollections(), getWebsiteConfig()]);
   assertUniqueSlugs(collections);
   const collection = collections.find((c) => c.slug === slug && c.visible);
   if (!collection) return { title: '未找到' };
+
+  const siteName = mergeConfig(websiteConfig).SITE_TITLE;
+  const description = collection.description || `${collection.name}合集`;
+  // 分享页的卡片要能独立成立：读者在聊天窗口里只看得到这张卡片，看不到站点。
+  // 因此 url 必须指向本页自身（否则会继承 layout 的 '/'），标题与描述也不能沿用站点级文案。
+  //
+  // NOTE: 合集封面优先，未填封面则退回站点级分享图。Notion 上传的封面是带签名的临时链接，
+  // 靠本页 revalidate 周期性重取保持有效（与 LinkIcon 的图标约束同源）。
+  const images = collection.cover
+    ? [{ url: collection.cover, alt: `${collection.name}｜${siteName}` }]
+    : [{ url: '/og.png', width: 1200, height: 630, alt: `${collection.name}｜${siteName}` }];
+
   return {
     title: collection.name,
-    description: collection.description || `${collection.name}合集`,
+    description,
+    openGraph: {
+      type: 'website',
+      locale: 'zh_CN',
+      url: `/c/${collection.slug}`,
+      title: collection.name,
+      description,
+      siteName,
+      images,
+    },
   };
 }
 

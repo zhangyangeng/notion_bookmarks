@@ -132,6 +132,50 @@
     color: rgb(var(--primary));
   }
 
+  /*
+   * 卡片「详情」入口的展开：静止一粒淡点，指针悬停 / 键盘聚焦后滑出「详情」二字。
+   * 收起态靠 max-width 收窄而非 display，文字才能平滑滑出。
+   *
+   * 只在真有指针的设备上展开 —— 触摸设备的 :hover 会粘滞在展开态，那粒淡点就是它的常驻态。
+   */
+  .card-detail-label {
+    max-width: 0;
+    opacity: 0;
+    transition:
+      max-width 0.2s ease,
+      padding-left 0.2s ease,
+      opacity 0.15s ease;
+  }
+
+  @media (hover: hover) {
+    .group:hover .card-detail-label {
+      max-width: 2.75rem;
+      padding-left: 0.25rem;
+      opacity: 1;
+    }
+  }
+
+  .card-detail-trigger:focus-visible .card-detail-label {
+    max-width: 2.75rem;
+    padding-left: 0.25rem;
+    opacity: 1;
+  }
+
+  /*
+   * 卡片底部带：标签与「详情」入口共用同一条水平带，标签在左、入口在右。
+   *
+   * 带高取入口高度（1.5rem，见 CardDetailTrigger），入口距卡片底边 0.5rem（bottom-2），
+   * 锚点底部 padding 同为 0.5rem —— 两者落在同一区间，齐平而不各占一行。
+   *
+   * 右侧留 2.75rem：入口展开、滑出「详情」二字后的宽度正好这么多，
+   * 落在净空里就不会压住标签。让位只发生在标签区，正文宽度分毫不减。
+   * 改动入口尺寸时需同步这里。
+   */
+  .card-detail-band {
+    min-height: 1.5rem;
+    padding-right: 2.75rem;
+  }
+
   /* 玻璃面：液态玻璃的统一配方 */
   .glass-surface {
     background: var(--glass-bg);

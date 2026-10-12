@@ -1,7 +1,7 @@
 import { getCollections, getLinks, getWebsiteConfig, hasDataFetchFailed } from '@/lib/notion';
 import { mergeConfig } from '@/config';
 import { assertUniqueSlugs, resolveCollectionBySlug } from '@/lib/collection';
-import ShareCard from '@/components/share/ShareCard';
+import ShareCollectionList from '@/components/share/ShareCollectionList';
 import DataUnavailableBanner from '@/components/layout/DataUnavailableBanner';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
@@ -116,11 +116,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ slu
         {memberLinks.length === 0 ? (
           <p className="text-muted-foreground">这个合集还没有内容。</p>
         ) : (
-          <div className="flex flex-col gap-3">
-            {memberLinks.map((link) => (
-              <ShareCard key={link.id} link={link} />
-            ))}
-          </div>
+          <ShareCollectionList links={memberLinks} />
         )}
 
         {/*

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import LinkContainer from '@/components/layout/LinkContainer';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import SearchPalette from '@/components/search/SearchPalette';
+import LinkDetailPanel from '@/components/ui/LinkDetailPanel';
 import { subCategoryAnchorId } from '@/lib/category';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -54,6 +55,8 @@ export default function MainContent({ categories, links, config, year }: MainCon
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  /** 当前打开详情的链接；null 表示弹层关闭。开合只有一个来源，不散落成多个布尔量 */
+  const [detailLink, setDetailLink] = useState<Link | null>(null);
   /*
    * 首帧恒为 'expanded'：服务端渲染的就是这个值，客户端首帧必须与之一致，否则 hydration 报错。
    * 真实状态在下方 layout effect 中于绘制前补齐。
@@ -73,6 +76,13 @@ export default function MainContent({ categories, links, config, year }: MainCon
       window.localStorage.setItem(SIDEBAR_STORAGE_KEY, state);
     }
   };
+
+  /*
+   * 两个详情回调都必须是稳定引用：LinkContainer 是 memo 的，
+   * 每次渲染换一个新函数会让 memo 失效，整个列表跟着重渲染。
+   */
+  const handleOpenDetail = useCallback((link: Link) => setDetailLink(link), []);
+  const handleCloseDetail = useCallback(() => setDetailLink(null), []);
 
   useEffect(() => {
     // 初始化时，默认选中第一个一级和二级分类
@@ -228,11 +238,18 @@ export default function MainContent({ categories, links, config, year }: MainCon
       >
         {/* pb-20：给浮起底部条（12px 外边距 + 约 44px 高）留位，不遮挡最后一行卡片 */}
         <div className="flex-1 w-full min-w-0 overflow-x-hidden px-4 py-4 md:pt-0 pb-20 pt-16">
-          {selectedCategory && <LinkContainer category={selectedCategory} links={filteredLinks} />}
+          {selectedCategory && (
+            <LinkContainer
+              category={selectedCategory}
+              links={filteredLinks}
+              onOpenDetail={handleOpenDetail}
+            />
+          )}
         </div>
       </main>
       {/* 底部浮起条与内容区共用同一套侧栏让位，避免压住侧栏圆角 */}
       <Footer config={config} className={SIDEBAR_MARGIN[sidebarState]} year={year} />
+      <LinkDetailPanel link={detailLink} onClose={handleCloseDetail} />
     </div>
   );
 }

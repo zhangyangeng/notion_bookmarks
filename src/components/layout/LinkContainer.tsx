@@ -12,12 +12,18 @@ interface LinkContainerProps {
   category: Category;
   /** 该一级分类下的全部链接 */
   links: Link[];
+  /** 透传给卡片右下角入口。请用 useCallback 传稳定引用，否则 memo 失效、整个列表重渲染 */
+  onOpenDetail?: (link: Link) => void;
 }
 
 const CARD_GRID_CLASS =
   'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3 w-full';
 
-const LinkContainer = memo(function LinkContainer({ category, links }: LinkContainerProps) {
+const LinkContainer = memo(function LinkContainer({
+  category,
+  links,
+  onOpenDetail,
+}: LinkContainerProps) {
   // 按二级分类分组。relation 只指到一级的条目没有二级，单独平铺在一级标题下，
   // 不塞进一个无名分组。
   const { ungrouped, grouped } = useMemo(() => {
@@ -66,6 +72,7 @@ const LinkContainer = memo(function LinkContainer({ category, links }: LinkConta
                 link={link}
                 className="w-full card-enter"
                 style={{ '--i': i } as React.CSSProperties}
+                onOpenDetail={onOpenDetail}
               />
             ))}
           </div>
@@ -89,6 +96,7 @@ const LinkContainer = memo(function LinkContainer({ category, links }: LinkConta
                   link={link}
                   className="w-full card-enter"
                   style={{ '--i': i } as React.CSSProperties}
+                  onOpenDetail={onOpenDetail}
                 />
               ))}
             </div>

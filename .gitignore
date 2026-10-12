@@ -14,8 +14,10 @@
 
 # Next.js
 /.next/
+/.next-dev/
 /out/
 .next/
+.next-dev/
 next-env.d.ts
 
 # Production

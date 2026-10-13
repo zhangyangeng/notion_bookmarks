@@ -6,7 +6,13 @@ import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
 import SearchPalette from '@/components/search/SearchPalette';
 import LinkDetailPanel from '@/components/ui/LinkDetailPanel';
-import { subCategoryAnchorId } from '@/lib/category';
+import {
+  anchorIdToSlug,
+  parseCategoryAnchor,
+  subCategoryAnchorId,
+  type CategoryAnchor,
+} from '@/lib/category';
+import { scrollToAnchor, writeAnchorHash } from '@/lib/anchor';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { Category, Link, WebsiteConfig } from '@/types';
@@ -25,6 +31,9 @@ interface MainContentProps {
 export type SidebarState = 'expanded' | 'icons';
 
 const SIDEBAR_STORAGE_KEY = 'nav.sidebar-state';
+
+/** 落位后暂停滚动同步的时长：覆盖平滑滚动走完全程所需的窗口 */
+const SCROLL_SYNC_LOCK_MS = 1000;
 
 /**
  * 各态对应的内容区左侧外边距。
@@ -51,6 +60,29 @@ function readSidebarState(): SidebarState {
  */
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
+/** 某个一级分类下的第一个二级锚点；没有二级则返回 null（该分类下没有可高亮的二级） */
+function firstSubAnchorId(categories: Category[], categoryId: string): string | null {
+  const firstSub = categories.find((category) => category.id === categoryId)?.subCategories[0];
+  return firstSub ? subCategoryAnchorId(categoryId, firstSub.id) : null;
+}
+
+/**
+ * 锚点解析结果 → 视图状态。
+ * 指名了二级就高亮它；只指到一级才退到该分类的第一个二级。
+ * 抽成模块级纯函数，是为了让两个 effect 共用同一套落位语义，同时不在依赖数组里塞组件内回调。
+ */
+function resolveAnchorView(anchor: CategoryAnchor, categories: Category[]) {
+  const activeSubId = anchor.subCategoryId
+    ? subCategoryAnchorId(anchor.categoryId, anchor.subCategoryId)
+    : firstSubAnchorId(categories, anchor.categoryId);
+
+  return {
+    categoryId: anchor.categoryId,
+    activeSubId,
+    elementId: activeSubId ?? anchor.categoryId,
+  };
+}
+
 export default function MainContent({ categories, links, config, year }: MainContentProps) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [activeSubCategoryId, setActiveSubCategoryId] = useState<string | null>(null);
@@ -62,8 +94,12 @@ export default function MainContent({ categories, links, config, year }: MainCon
    * 真实状态在下方 layout effect 中于绘制前补齐。
    */
   const [sidebarState, setSidebarState] = useState<SidebarState>('expanded');
-  const isClickScrolling = useRef(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  /*
+   * 落位期间暂停滚动同步的时刻线。用时间戳而不是布尔锁 + 定时器：
+   * 滚动监听的 effect 会在切换分类时重建，定时器存在 ref 里会被重建时的清理函数一并清掉，
+   * 解锁从此再不会发生；时间戳不占任何可被清理的资源，effect 怎么重建都拿不走。
+   */
+  const scrollSyncLockUntil = useRef(0);
 
   useIsomorphicLayoutEffect(() => {
     const saved = readSidebarState();
@@ -84,46 +120,89 @@ export default function MainContent({ categories, links, config, year }: MainCon
   const handleOpenDetail = useCallback((link: Link) => setDetailLink(link), []);
   const handleCloseDetail = useCallback(() => setDetailLink(null), []);
 
-  useEffect(() => {
-    // 初始化时，默认选中第一个一级和二级分类
-    if (categories.length > 0 && !selectedCategoryId) {
-      const firstCategory = categories[0];
-      setSelectedCategoryId(firstCategory.id);
-      if (firstCategory.subCategories.length > 0) {
-        setActiveSubCategoryId(
-          subCategoryAnchorId(firstCategory.id, firstCategory.subCategories[0].id),
-        );
+  /**
+   * 落位期间关掉滚动同步：滚动过程会途经多个区块，监听若跟着改写锚点，
+   * 会把刚写进去的目标锚点覆盖成中途路过的那个。
+   */
+  const lockScrollSync = useCallback(() => {
+    scrollSyncLockUntil.current = Date.now() + SCROLL_SYNC_LOCK_MS;
+  }, []);
+
+  /*
+   * 初始视图在浏览器绘制前定下：地址栏带锚点就按锚点落位，没有才回到第一个分类。
+   * NOTE: hash 不会发给服务端，服务端输出的必然是「未选中分类」的空内容；
+   *       用 layout effect 在绘制前补齐，这一帧差异用户看不到。
+   *       深链落位用 instant —— 直接打开链接的人不该看到页面从顶部自己滑下去。
+   */
+  useIsomorphicLayoutEffect(() => {
+    const anchor = parseCategoryAnchor(window.location.hash, categories);
+
+    if (!anchor) {
+      if (categories.length > 0) {
+        const firstCategory = categories[0];
+        setSelectedCategoryId(firstCategory.id);
+        setActiveSubCategoryId(firstSubAnchorId(categories, firstCategory.id));
       }
+      return;
     }
-  }, [categories, selectedCategoryId]);
+
+    const view = resolveAnchorView(anchor, categories);
+    setSelectedCategoryId(view.categoryId);
+    setActiveSubCategoryId(view.activeSubId);
+    lockScrollSync();
+    scrollToAnchor(view.elementId, 'instant');
+  }, [categories, lockScrollSync]);
+
+  /*
+   * 浏览器前进后退与手动改地址栏都会触发 hashchange；自写的 pushState 不触发，故不会回流。
+   * 复用与点击导航同一套落位语义：解析锚点 → 选中分类 → 滚到目标。
+   */
+  useEffect(() => {
+    const handleHashChange = () => {
+      const anchor = parseCategoryAnchor(window.location.hash, categories);
+
+      // 退回没有锚点的历史条目：分类不动，只把视口收回页顶
+      if (!anchor) {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+
+      const view = resolveAnchorView(anchor, categories);
+      setSelectedCategoryId(view.categoryId);
+      setActiveSubCategoryId(view.activeSubId);
+      lockScrollSync();
+      scrollToAnchor(view.elementId, 'instant');
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [categories, lockScrollSync]);
 
   const handleNavChange = (categoryId: string, subCategoryId?: string | null) => {
     setSelectedCategoryId(categoryId);
 
+    /*
+     * 点击只负责写锚点与落位，滚动实现不在这里各写一份 ——
+     * 点击、深链、前进后退三条路径共用同一套落位逻辑。
+     */
+    // 内部一律用区块锚点 id 定位，只在写地址栏那一步换算成短名
+    const anchorId = subCategoryId ?? categoryId;
+    writeAnchorHash(anchorIdToSlug(anchorId, categories), 'push');
+    lockScrollSync();
+    scrollToAnchor(anchorId, 'smooth');
+
     if (subCategoryId) {
-      // 点击二级菜单
       setActiveSubCategoryId(subCategoryId);
-      isClickScrolling.current = true;
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      scrollTimeoutRef.current = setTimeout(() => {
-        isClickScrolling.current = false;
-      }, 1000); // 1秒后恢复滚动监听
     } else {
       // 点击一级菜单，立即将高亮设置为新分类的第一个二级菜单；没有二级则不高亮
-      const newCategory = categories.find((c) => c.id === categoryId);
-      const firstSubCategory = newCategory?.subCategories[0];
-      setActiveSubCategoryId(
-        firstSubCategory ? subCategoryAnchorId(categoryId, firstSubCategory.id) : null,
-      );
+      setActiveSubCategoryId(firstSubAnchorId(categories, categoryId));
     }
   };
 
   // 滚动监听逻辑
   useEffect(() => {
     const handleScroll = () => {
-      if (isClickScrolling.current) {
+      if (Date.now() < scrollSyncLockUntil.current) {
         return;
       }
 
@@ -131,7 +210,13 @@ export default function MainContent({ categories, links, config, year }: MainCon
         document.querySelectorAll('section[id] div[id]'),
       ) as HTMLElement[];
 
-      if (sections.length === 0) return;
+      // 该分类没有二级区块：地址栏保持在分类级锚点上
+      if (sections.length === 0) {
+        if (selectedCategoryId) {
+          writeAnchorHash(anchorIdToSlug(selectedCategoryId, categories), 'replace');
+        }
+        return;
+      }
 
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -142,6 +227,7 @@ export default function MainContent({ categories, links, config, year }: MainCon
         // 5px 容差
         const lastSectionId = sections[sections.length - 1].id;
         setActiveSubCategoryId((prevId) => (prevId !== lastSectionId ? lastSectionId : prevId));
+        writeAnchorHash(anchorIdToSlug(lastSectionId, categories), 'replace');
         return;
       }
 
@@ -155,27 +241,26 @@ export default function MainContent({ categories, links, config, year }: MainCon
         }
       }
 
-      // 如果滚动位置在所有区域之上，则默认高亮第一个
-      if (newActiveSubId === null && sections.length > 0) {
+      /*
+       * 视口在所有区块之上：此刻没有「当前区块」，锚点一并清掉 ——
+       * 留着上一个区块的锚点，会让从地址栏复制出去的链接指向错误位置。高亮仍落到第一个区块。
+       */
+      const aboveAllSections = newActiveSubId === null;
+      const activeSectionId = aboveAllSections ? null : newActiveSubId;
+      if (aboveAllSections) {
         newActiveSubId = sections[0].id;
       }
 
-      setActiveSubCategoryId((prevId) => {
-        if (prevId !== newActiveSubId) {
-          return newActiveSubId;
-        }
-        return prevId;
-      });
+      setActiveSubCategoryId((prevId) => (prevId !== newActiveSubId ? newActiveSubId : prevId));
+      writeAnchorHash(
+        activeSectionId ? anchorIdToSlug(activeSectionId, categories) : '',
+        'replace',
+      );
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [selectedCategoryId]);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [selectedCategoryId, categories]);
 
   // 找到当前选中的一级分类
   const selectedCategory = useMemo(

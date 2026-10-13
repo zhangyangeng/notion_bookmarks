@@ -86,42 +86,23 @@ const Navigation = memo(function Navigation({
     setExpandedCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
   }, []);
 
-  const handleScrollTo = useCallback((categoryId: string, subCategoryId?: string) => {
-    setTimeout(() => {
-      if (typeof window === 'undefined' || typeof document === 'undefined') return;
-
-      const elementId = subCategoryId ? subCategoryAnchorId(categoryId, subCategoryId) : categoryId;
-      const element = document.getElementById(elementId);
-
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        window.scrollTo({
-          top: rect.top + scrollTop - 100,
-          behavior: 'smooth',
-        });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 0);
-  }, []);
-
+  /*
+   * 点击只上报意图：切换分类、写锚点、滚动都由 MainContent 统一处理 ——
+   * 点击、深链、前进后退三条路径共用同一套落位逻辑，不在这里各写一份。
+   */
   const handleCategoryClick = useCallback(
     (category: Category) => {
       onNavChange(category.id);
       handleCategoryToggle(category.id);
-      handleScrollTo(category.id);
     },
-    [onNavChange, handleCategoryToggle, handleScrollTo],
+    [onNavChange, handleCategoryToggle],
   );
 
   const handleSubCategoryClick = useCallback(
     (category: Category, subCategory: SubCategory) => {
       onNavChange(category.id, subCategoryAnchorId(category.id, subCategory.id));
-      handleScrollTo(category.id, subCategory.id);
     },
-    [onNavChange, handleScrollTo],
+    [onNavChange],
   );
 
   const handleMobileCategoryClick = useCallback(

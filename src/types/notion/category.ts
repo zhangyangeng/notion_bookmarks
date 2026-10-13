@@ -23,6 +23,14 @@ export interface NotionCategoryProperties {
   IconName: RichTextPropertyItemObjectResponse;
   Order: NumberPropertyItemObjectResponse;
   Enabled: CheckboxPropertyItemObjectResponse;
+  /**
+   * 地址栏短名。
+   *
+   * NOTE: 声明为可选，且**不参与** `isNotionCategoryPage` 的合法性判定 ——
+   *       字段尚未在库上建立、或某条记录漏填时，分类整体仍应可解析，
+   *       只是该分类的锚点退回记录 id（链接变长，但不会失效）。
+   */
+  Slug?: RichTextPropertyItemObjectResponse;
 }
 
 /**
@@ -42,6 +50,8 @@ export interface SubCategory {
   id: string;
   name: string;
   order: number;
+  /** 地址栏短名，只需在本一级分类内唯一；null 表示未填，锚点退回记录 id */
+  slug: string | null;
 }
 
 /**
@@ -56,6 +66,11 @@ export type CategoryIconData = { kind: 'svg'; inner: string } | { kind: 'text'; 
 export interface Category {
   id: string;
   name: string;
+  /**
+   * 地址栏短名，同时充当二级短名的命名空间（`dev` → 二级 `dev/tools`）。
+   * null 表示未填，锚点退回记录 id。
+   */
+  slug: string | null;
   /** Notion `IconName` 原始值。保留用于溯源与对账，UI 不直接渲染它 */
   iconName: string;
   /** 由 iconName 解析所得；null 表示无图标或名字认不出，由 UI 兜底 */
@@ -82,6 +97,8 @@ export function toCategory(page: NotionCategoryPage): Category {
   return {
     id: page.id,
     name: extractTitle(props.Name),
+    // 空串归一成 null，让「没填」在锚点体系里只有一个表示
+    slug: extractRichText(props.Slug) || null,
     iconName: extractRichText(props.IconName),
     // 解析结果由 lib 层（getCategories）在服务端补入 —— 类型层不依赖渲染库
     icon: null,
